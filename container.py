@@ -141,7 +141,50 @@ def verify_containers(root_dir_path="./root_dir"):
         print("Some container tests failed.")
 
 
+def test_container_isolation(root_dir_path="./root_dir"):
+    processes = []
+    result_queue = Queue()
+    root_dir = root_dir_path
+
+    clear_root_dir(root_dir)
+
+    # Isolation Test Commands:
+    # Container_1 creates a file and writes some content
+    # Container_2 tries to read that file (should not find it)
+    # Container_3 creates a directory and lists the contents (should only see its own)
+    commands = [
+        ("echo 'Hello from Container 1' > /file_in_container_1.txt", ""),  # Container 1 creates a file
+        ("cat /file_in_container_1.txt", "cat: /file_in_container_1.txt: No such file or directory"),
+        # Container 2 tries to read the file (should not exist)
+        ("mkdir /testdir_container_3 && ls /", "testdir_container_3"),  # Container 3 creates a directory and lists root
+    ]
+
+    for i, (command, expected_output) in enumerate(commands):
+        process = Process(target=run_container_test, args=(f"Container_{i + 1}", root_dir, command, result_queue))
+        processes.append(process)
+        process.start()
+
+    for process in processes:
+        process.join()
+
+    passed = True
+    while not result_queue.empty():
+        container_name, actual_output = result_queue.get()
+        expected_output = commands[int(container_name.split("_")[1]) - 1][1]
+        if not check_output(actual_output, expected_output):
+            passed = False
+            print(f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}")
+        else:
+            print(f"Test passed for {container_name}.")
+
+    if passed:
+        print("All container isolation tests passed successfully!")
+    else:
+        print("Some container isolation tests failed.")
+
+
 # Run the test
 if __name__ == "__main__":
     #  test_containers()
-    verify_containers()
+    #  verify_containers()
+    test_container_isolation()
