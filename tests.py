@@ -9,25 +9,26 @@ import subprocess
 from container import *
 from multiprocessing import Process, Queue
 
-def run_container_test(container_name, root_dir, command, result_queue):
+def run_container_test(container_name, root_dir, command, result_queue, xcontainer= False):
+    if xcontainer:
+        pass
+    else:
+        container = Container(container_name, root_dir)
+    container.run(command, result_queue)
+    print(f"{container_name} finished running {command}")
+
+def run_container_test_mac(container_name, root_dir, command, result_queue, xcontainer= False):
     container = Container(container_name, root_dir)
+    print(f"Running command in container {container_name}: {command}")
     container.run(command, result_queue)
     print(f"{container_name} finished running {command}")
 
 
-def run_container_test_mac(container_name, container_dir, command, result_queue):
+def run_container_test_mac(container_name, root_dir, command, result_queue, xcontainer=False):
+    container = Container(container_name, root_dir)
     print(f"Running command in container {container_name}: {command}")
-    try:
-        os.makedirs(container_dir, exist_ok=True)
-        result = subprocess.run(command, shell=True, cwd=container_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output = result.stdout.decode("utf-8").strip() + result.stderr.decode("utf-8").strip()
-
-        result_queue.put((container_name, output))
-    except Exception as e:
-        result_queue.put((container_name, str(e)))
-    finally:
-        print(f"{container_name} finished running {command}")
-
+    container.run_mac(command, result_queue)
+    print(f"{container_name} finished running {command}")
 
 def clear_root_dir(root_dir):
     protected_dirs = {"bin", "lib", "usr"}
@@ -52,8 +53,7 @@ def check_output(actual_output, expected_output):
     return actual_output.strip() == expected_output.strip()
 
 
-def verify_containers(root_dir_path="./root_dir"):
-    root_dir = root_dir_path
+def verify_containers(root_dir="./root_dir"):
     processes = []
     result_queue = Queue()
 
@@ -100,12 +100,47 @@ def verify_containers(root_dir_path="./root_dir"):
     else:
         print("Some container tests failed.")
 
-
-def test_container_isolation(root_dir_path="./root_dir"):
+def verify_containers_mac(root_dir="./root_dir"):
     processes = []
     result_queue = Queue()
-    root_dir = root_dir_path
+    clear_root_dir(root_dir)
 
+    commands = [
+        ("echo 'This is Container 1' > testfile1.txt && cat testfile1.txt", "This is Container 1"),
+        ("mkdir testdir && echo 'Creating a directory in Container 2'", "Creating a directory in Container 2"),
+        ("/bin/bash -c 'echo Bash from Container 3 && sleep 2 && echo Finished sleeping'",
+         "Bash from Container 3\nFinished sleeping"),
+        ("touch tempfile && echo 'Touched tempfile in Container 4'", "Touched tempfile in Container 4"),
+        ("/bin/bash -c 'for i in {1..5}; do echo Looping $i in Container 5; sleep 1; done'",
+         "Looping 1 in Container 5\nLooping 2 in Container 5\nLooping 3 in Container 5\nLooping 4 in Container 5\nLooping 5 in Container 5"),
+    ]
+
+    for i, (command, expected_output) in enumerate(commands):
+        process = Process(target=run_container_test_mac, args=(f"Container_{i + 1}", root_dir, command, result_queue))
+        processes.append(process)
+        process.start()
+
+    for process in processes:
+        process.join()
+
+    passed = True
+    while not result_queue.empty():
+        container_name, actual_output = result_queue.get()
+        expected_output = commands[int(container_name.split("_")[1]) - 1][1]
+        if not check_output(actual_output, expected_output):
+            passed = False
+            print(f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}")
+        else:
+            print(f"Test passed for {container_name}.")
+
+    if passed:
+        print("All container tests passed successfully!")
+    else:
+        print("Some container tests failed.")
+
+def test_container_isolation(root_dir="./root_dir"):
+    processes = []
+    result_queue = Queue()
     clear_root_dir(root_dir)
 
     commands = [
@@ -141,57 +176,10 @@ def test_container_isolation(root_dir_path="./root_dir"):
     else:
         print("Some container isolation tests failed.")
 
-
-def verify_containers_mac(root_dir_path="./root_dir"):
+def test_container_isolation_mac(root_dir="./root_dir"):
     processes = []
     result_queue = Queue()
-    base_dir = root_dir_path
-
-    clear_root_dir(base_dir)
-
-    commands = [
-        ("/bin/ls -l", "total 0"),  # Listing files in the container directory (empty at start)
-        ("echo 'This is Container 1' > testfile1.txt && cat testfile1.txt", "This is Container 1"),
-        ("mkdir testdir && echo 'Creating a directory in Container 2'", "Creating a directory in Container 2"),
-        ("/bin/bash -c 'echo Bash from Container 3 && sleep 2 && echo Finished sleeping'",
-         "Bash from Container 3\nFinished sleeping"),
-        ("touch tempfile && echo 'Touched tempfile in Container 4'", "Touched tempfile in Container 4"),
-        ("/bin/bash -c 'for i in {1..5}; do echo Looping $i in Container 5; sleep 1; done'",
-         "Looping 1 in Container 5\nLooping 2 in Container 5\nLooping 3 in Container 5\nLooping 4 in Container 5\nLooping 5 in Container 5"),
-    ]
-
-    for i, (command, expected_output) in enumerate(commands):
-        container_dir = os.path.join(base_dir, f"container_{i + 1}")
-        process = Process(target=run_container_test_mac,
-                          args=(f"Container_{i + 1}", container_dir, command, result_queue))
-        processes.append(process)
-        process.start()
-
-    for process in processes:
-        process.join()
-
-    passed = True
-    while not result_queue.empty():
-        container_name, actual_output = result_queue.get()
-        expected_output = commands[int(container_name.split("_")[1]) - 1][1]
-        if not check_output(actual_output, expected_output):
-            passed = False
-            print(f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}")
-        else:
-            print(f"Test passed for {container_name}.")
-
-    if passed:
-        print("All container tests passed successfully!")
-    else:
-        print("Some container tests failed.")
-
-
-def test_container_isolation_mac(root_dir_path="./root_dir"):
-    processes = []
-    result_queue = Queue()
-    base_dir = root_dir_path
-
-    clear_root_dir(base_dir)
+    clear_root_dir(root_dir)
 
     commands = [
         ("echo 'Hello from Container 1' > testfile1.txt", ""),
@@ -204,9 +192,7 @@ def test_container_isolation_mac(root_dir_path="./root_dir"):
     ]
 
     for i, (command, expected_output) in enumerate(commands):
-        container_dir = os.path.join(base_dir, f"container_{i + 1}")
-        process = Process(target=run_container_test_mac,
-                          args=(f"Container_{i + 1}", container_dir, command, result_queue))
+        process = Process(target=run_container_test_mac, args=(f"Container_{i + 1}", root_dir, command, result_queue))
         processes.append(process)
         process.start()
 
@@ -231,8 +217,14 @@ def test_container_isolation_mac(root_dir_path="./root_dir"):
 
 # Run the tests
 if __name__ == "__main__":
-    #  SYSTEM = 'LINUX'
-    SYSTEM = 'MACOS'
+    os_name = input("Enter 'L' for Linux and 'M' for Mac OS:")
+    if os_name.upper() == "L":
+        SYSTEM = 'LINUX'
+    elif os_name.upper() == "M":
+        SYSTEM = 'MACOS'
+    else:
+        SYSTEM = 'LINUX'
+        print("Non-valid OS name. Choosing Linux.")
 
     if SYSTEM == 'LINUX':
         print("Running verify_containers:\n")
@@ -242,5 +234,3 @@ if __name__ == "__main__":
     elif SYSTEM == 'MACOS':
         print("Running verify_containers_mac:\n")
         verify_containers_mac()
-        print("\n\nRunning test_container_isolation_mac:\n")
-        test_container_isolation_mac()
