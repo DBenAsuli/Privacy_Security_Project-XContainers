@@ -8,19 +8,13 @@ from excontainer import *
 from colorama import Fore, Style
 from multiprocessing import Process, Queue
 
+# Run a command on Container (Linux)
 def run_container_test(container_name, root_dir, command, result_queue):
     container = Container(container_name, root_dir)
     container.run(command, result_queue)
     print(f"{container_name} finished running {command}")
 
-
-def run_container_test_mac(container_name, root_dir, command, result_queue):
-    container = Container(container_name, root_dir)
-    print(f"Running command in container {container_name}: {command}")
-    container.run(command, result_queue)
-    print(f"{container_name} finished running {command}")
-
-
+# Run a command on Container (MacOS)
 def run_container_test_mac(container_name, root_dir, command, result_queue):
     container = Container(container_name, root_dir)
     print(f"Running command in container {container_name}: {command}")
@@ -47,12 +41,13 @@ def clear_root_dir(root_dir):
         print(f"Created root_dir directory at {root_dir}")
 
 
-def check_output(actual_output, expected_output):
+def compare_output(actual_output, expected_output):
     return actual_output.strip() == expected_output.strip()
 
-
+# Run tests for Container class (Linux)
 def verify_container(root_dir="./root_dir"):
     processes = []
+    test_results = []
     result_queue = Queue()
 
     clear_root_dir(root_dir)
@@ -83,24 +78,33 @@ def verify_container(root_dir="./root_dir"):
     for process in processes:
         process.join()
 
-    passed = True
     while not result_queue.empty():
         container_name, actual_output = result_queue.get()
+        command = commands[int(container_name.split("_")[1]) - 1][0]
         expected_output = commands[int(container_name.split("_")[1]) - 2][1]
-        if not check_output(actual_output, expected_output):
-            passed = False
+        if not compare_output(actual_output, expected_output):
+            test_results.append((container_name, command, False))
             print(Fore.RED + f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}" + Style.RESET_ALL)
         else:
+            test_results.append((container_name, command, True))
             print(Fore.GREEN + f"Test passed for {container_name}." + Style.RESET_ALL)
 
-    if passed:
-        print(Fore.GREEN + "\nAll container tests passed successfully!" + Style.RESET_ALL)
+    print(Fore.GREEN + "\n--- Test Results ---" + Style.RESET_ALL)
+    for container_name, test, passed in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        print(color + f"{container_name}: {test}: {status}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
     else:
-        print(Fore.RED + "Some container tests failed." + Style.RESET_ALL)
+        print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
 
 
+# Run tests for Container class (MacOS)
 def verify_container_mac(root_dir="./root_dir"):
     processes = []
+    test_results = []
     result_queue = Queue()
     clear_root_dir(root_dir)
 
@@ -122,24 +126,32 @@ def verify_container_mac(root_dir="./root_dir"):
     for process in processes:
         process.join()
 
-    passed = True
     while not result_queue.empty():
         container_name, actual_output = result_queue.get()
+        command = commands[int(container_name.split("_")[1]) - 1][0]
         expected_output = commands[int(container_name.split("_")[1]) - 1][1]
-        if not check_output(actual_output, expected_output):
-            passed = False
+        if not compare_output(actual_output, expected_output):
+            test_results.append((container_name, command, False))
             print(Fore.RED + f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}" + Style.RESET_ALL)
         else:
+            test_results.append((container_name, command, True))
             print(Fore.GREEN + f"Test passed for {container_name}." + Style.RESET_ALL)
 
-    if passed:
-        print(Fore.GREEN + "\nAll container tests passed successfully!" + Style.RESET_ALL)
+    print(Fore.GREEN + "\n--- Test Results ---" + Style.RESET_ALL)
+    for container_name, test, passed in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        print(color + f"{container_name}: {test}: {status}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
     else:
-        print(Fore.RED + "Some container tests failed." + Style.RESET_ALL)
+        print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
 
-
+# Run Isolation tests for Container class (Linux)
 def test_container_isolation(root_dir="./root_dir"):
     processes = []
+    test_results = []
     result_queue = Queue()
     clear_root_dir(root_dir)
 
@@ -161,24 +173,33 @@ def test_container_isolation(root_dir="./root_dir"):
     for process in processes:
         process.join()
 
-    passed = True
     while not result_queue.empty():
         container_name, actual_output = result_queue.get()
+        command = commands[int(container_name.split("_")[1]) - 1][0]
         expected_output = commands[int(container_name.split("_")[1]) - 1][1]
-        if not check_output(actual_output, expected_output):
-            passed = False
+        if not compare_output(actual_output, expected_output):
+            test_results.append((container_name, command, False))
             print(Fore.RED + f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}" + Style.RESET_ALL)
         else:
+            test_results.append((container_name, command, True))
             print(Fore.GREEN + f"Test passed for {container_name}." + Style.RESET_ALL)
 
-    if passed:
-        print(Fore.GREEN + "\nAll container isolation tests passed successfully!" + Style.RESET_ALL)
+    print(Fore.GREEN + "\n--- Test Results ---" + Style.RESET_ALL)
+    for container_name, test, passed in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        print(color + f"{container_name}: {test}: {status}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
     else:
-        print(Fore.RED + "Some container isolation tests failed." + Style.RESET_ALL)
+        print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
 
-
+# Run Isolation tests for Container class (MacOS)
+# NOT STABLE #
 def test_container_isolation_mac(root_dir="./root_dir"):
     processes = []
+    test_results = []
     result_queue = Queue()
     clear_root_dir(root_dir)
 
@@ -200,22 +221,42 @@ def test_container_isolation_mac(root_dir="./root_dir"):
     for process in processes:
         process.join()
 
-    passed = True
     while not result_queue.empty():
         container_name, actual_output = result_queue.get()
+        command = commands[int(container_name.split("_")[1]) - 1][0]
         expected_output = commands[int(container_name.split("_")[1]) - 1][1]
-        if not check_output(actual_output, expected_output):
-            passed = False
+        if not compare_output(actual_output, expected_output):
+            test_results.append((container_name, command, False))
             print(Fore.RED + f"Test failed for {container_name}.\nExpected:\n{expected_output}\nGot:\n{actual_output}" + Style.RESET_ALL)
         else:
+            test_results.append((container_name, command, True))
             print(Fore.GREEN + f"Test passed for {container_name}." + Style.RESET_ALL)
 
-    if passed:
-        print(Fore.GREEN + "\nAll container isolation tests passed successfully!" + Style.RESET_ALL)
+    print(Fore.GREEN + "\n--- Test Results ---" + Style.RESET_ALL)
+    for container_name, test, passed in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        print(color + f"{container_name}: {test}: {status}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
     else:
-        print(Fore.RED + "Some container isolation tests failed." + Style.RESET_ALL)
+        print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
 
+# Run tests for X-Container class (Linux)
+def verify_xcontainer(root_dir="./root_dir_x"):
+    hypervisor_1 = Hypervisor()
+    xcontainer_1 = XContainer("XContainer_1", root_dir, hypervisor_1)
 
+    hypervisor_2 = Hypervisor()
+    xcontainer_2 = XContainer("XContainer_2", root_dir, hypervisor_2)
+
+    test_results = []
+    clear_root_dir(root_dir)
+
+    # TODO Siwar Implement for Linux
+
+# Run tests for X-Container class (MacOS)
 def verify_xcontainer_mac(root_dir="./root_dir_x"):
     hypervisor_1 = Hypervisor()
     xcontainer_1 = XContainer("XContainer_1", root_dir, hypervisor_1)
@@ -233,8 +274,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         output_1 = xcontainer_1.run_secure_command_mac(command_1)
         assert output_1 == "", "Expected no output after command execution in XContainer 1"
         test_results.append(("Command Encryption and Decryption - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Command Encryption and Decryption - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
 
     try:
         print(Fore.BLUE + "\n--- Testing Command Encryption and Decryption for XContainer 2 ---" + Style.RESET_ALL)
@@ -242,8 +285,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         output_2 = xcontainer_2.run_secure_command_mac(command_2)
         assert output_2 == "", "Expected no output after command execution in XContainer 2"
         test_results.append(("Command Encryption and Decryption - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Command Encryption and Decryption - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
     # Verify that the file content is encrypted and decrypted properly for both containers
     try:
@@ -251,16 +296,20 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         output_1 = xcontainer_1.run_secure_command_mac("cat testfile_x1.txt")
         assert output_1.strip().lower() == "Hello from XContainer 1".strip().lower(), "File content mismatch in XContainer 1"
         test_results.append(("File Content After Encryption - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("File Content After Encryption - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
 
     try:
         print(Fore.BLUE + "\n--- Testing File Content After Encryption for XContainer 2 ---" + Style.RESET_ALL)
         output_2 = xcontainer_2.run_secure_command_mac("cat testfile_x2.txt")
         assert output_2.strip().lower() == "Hello from XContainer 2".strip().lower(), "File content mismatch in XContainer 2"
         test_results.append(("File Content After Encryption - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("File Content After Encryption - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
     # Check task offloading to hypervisor for both containers
     try:
@@ -268,16 +317,20 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         hypervisor_output_1 = xcontainer_1.offload_to_hypervisor("file_io", "testfile_x1.txt")
         assert "Handled" in hypervisor_output_1, "Hypervisor did not handle the task correctly for XContainer 1"
         test_results.append(("Task Offloading to Hypervisor - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Task Offloading to Hypervisor - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
 
     try:
         print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for XContainer 2 ---" + Style.RESET_ALL)
         hypervisor_output_2 = xcontainer_2.offload_to_hypervisor("file_io", "testfile_x2.txt")
         assert "Handled" in hypervisor_output_2, "Hypervisor did not handle the task correctly for XContainer 2"
         test_results.append(("Task Offloading to Hypervisor - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Task Offloading to Hypervisor - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
     # Memory encryption tests for both containers
     try:
@@ -287,8 +340,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         decrypted_data_1 = xcontainer_1.decrypt_command(encrypted_data_1)
         assert decrypted_data_1 == sensitive_data_1, "Decrypted data does not match original in XContainer 1"
         test_results.append(("Memory Encryption - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Memory Encryption - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
 
     try:
         print(Fore.BLUE + "\n--- Testing Memory Encryption for XContainer 2 ---" + Style.RESET_ALL)
@@ -297,8 +352,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         decrypted_data_2 = xcontainer_2.decrypt_command(encrypted_data_2)
         assert decrypted_data_2 == sensitive_data_2, "Decrypted data does not match original in XContainer 2"
         test_results.append(("Memory Encryption - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Memory Encryption - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
     try:
         print(Fore.BLUE + "\n--- Testing Encryption of Multiple Commands ---" + Style.RESET_ALL)
@@ -316,9 +373,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
             assert result.strip().lower() == expected_output.strip().lower(), f"Unexpected output for command: {cmd}\nExpected: {expected_output}\nGot: {result}"
 
         test_results.append(("Encryption of Multiple Commands", True))
+        print(Fore.GREEN + "Encryption of Multiple Commands: PASSED" + Style.RESET_ALL)
 
         # Simulate an adversary trying to directly access the files without using the XContainer
-        print(Fore.BLUE + "\n--- Testing Adversary Access to Encrypted Files ---" + Style.RESET_ALL)
+        print(Fore.BLUE + "\n   --- Testing Adversary Access to Encrypted Files ---" + Style.RESET_ALL)
 
         # Simulate adversary trying to access the file directly without decryption
         adversary_command = "cat secret_file1.txt"
@@ -334,18 +392,19 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
             assert "no such file" in adversary_output.lower() or adversary_output.strip() != "", "Adversary got unexpected readable output!"
 
             test_results.append(("Adversary Access Prevention", True))  # Test passed
-            print("Adversary access prevention: PASSED")
+            print(Fore.GREEN + "    Adversary access prevention: PASSED" + Style.RESET_ALL)
 
         except Exception as e:
-            print(f"Adversary access test failed: {e}")
+            print(f"    Adversary access test failed: {e}")
             test_results.append(("Adversary Access Prevention", False))  # Test failed
-            print("Adversary access prevention: FAILED")
+            print(Fore.RED + "  Adversary access prevention: FAILED" + Style.RESET_ALL)
 
     except AssertionError as e:
         print(e)
-        test_results.append(("Encryption of Multiple Commands", False))  # Test failed
-        test_results.append(
-            ("Adversary Access Prevention", False))
+        test_results.append(("  Encryption of Multiple Commands", False))  # Test failed
+        print(Fore.RED + "Encryption of Multiple Commands: PASSED" + Style.RESET_ALL)
+        test_results.append(("Adversary Access Prevention", False))
+
 
     try:
         print(Fore.BLUE + "\n--- Testing Hypervisor Offloading for Sensitive I/O ---" + Style.RESET_ALL)
@@ -354,8 +413,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
             assert "Handled" in hypervisor_result, "Hypervisor did not handle I/O correctly"
 
         test_results.append(("Hypervisor Offloading for Sensitive I/O", True))
+        print(Fore.GREEN + "Hypervisor Offloading for Sensitive I/O: PASSED" + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Hypervisor Offloading for Sensitive I/O", False, str(e)))
+        print(Fore.RED + "Hypervisor Offloading for Sensitive I/O: FAILED" + Style.RESET_ALL)
 
     # Verify that XContainer 2 cannot decrypt XContainer 1's data
     try:
@@ -371,8 +432,10 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         assert cross_container_output.strip() != "Private data from XContainer 1".strip(), "XContainer 2 was able to decrypt XContainer 1's file!"
 
         test_results.append(("Cross-Container Encryption Isolation", True))
+        print(Fore.GREEN + "Cross-Container Encryption Isolation: PASSED" + Style.RESET_ALL)
     except Exception as e:
         test_results.append(("Cross-Container Encryption Isolation", False, str(e)))
+        print(Fore.RED + "Cross-Container Encryption Isolation: FAILED" + Style.RESET_ALL)
 
     print(Fore.GREEN + "\n--- Test Results ---" + Style.RESET_ALL)
     for test, passed, *reason in test_results:
@@ -384,8 +447,22 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll X-Containers tests completed successfully!" + Style.RESET_ALL)
     else:
-        print(Fore.RED + "Some tests failed. Check the output for details." + Style.RESET_ALL)
+        print(Fore.RED + "Some X-Containers tests failed. Check the output for details." + Style.RESET_ALL)
 
+# Run tests for Enhanced X-Container class (Linux)
+def verify_excontainer(root_dir="./root_dir_ex"):
+    hypervisor_1 = Hypervisor()
+    excontainer_1 = EXContainer("EXContainer_1", root_dir, hypervisor_1)
+
+    hypervisor_2 = Hypervisor()
+    excontainer_2 = EXContainer("EXContainer_2", root_dir, hypervisor_2)
+
+    test_results = []
+    clear_root_dir(root_dir)
+
+    # TODO Implement after EX-Containers are implemented
+
+# Run tests for Enhanced X-Container class (MacOS)
 def verify_excontainer_mac(root_dir="./root_dir_ex"):
     hypervisor_1 = Hypervisor()
     excontainer_1 = EXContainer("EXContainer_1", root_dir, hypervisor_1)
@@ -396,17 +473,17 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO Implement after X-Containers are implemented
+    # TODO Implement after EX-Containers are implemented
 
 # Run 'regular' Containers tests
 def run_containers_tests(SYSTEM='LINUX'):
     if SYSTEM == 'LINUX':
-        print("Running verify_container:\n")
+        print(Fore.CYAN + "Running verify_container:\n" + Style.RESET_ALL)
         verify_container()
-        print("\n\nRunning test_container_isolation:\n")
+        print(Fore.CYAN + "\n\nRunning test_container_isolation:\n" + Style.RESET_ALL)
         test_container_isolation()
     elif SYSTEM == 'MACOS':
-        print("Running verify_container_mac:\n")
+        print(Fore.CYAN + "Running verify_container_mac:\n" + Style.RESET_ALL)
         verify_container_mac()
 
 
@@ -415,7 +492,7 @@ def run_xcontainer_tests(SYSTEM='LINUX'):
     if SYSTEM == 'LINUX':
         pass  # TODO
     elif SYSTEM == 'MACOS':
-        print("Running verify_xcontainer_mac:\n")
+        print(Fore.CYAN + "Running verify_xcontainer_mac:\n" + Style.RESET_ALL)
         verify_xcontainer_mac()
 
 
@@ -439,14 +516,18 @@ if __name__ == "__main__":
         print("Non-valid OS name. Choosing Linux.")
 
     if SYSTEM == 'LINUX':
-        print("Running verify_container:\n")
+        print(Fore.CYAN + "Running verify_container:\n" + Style.RESET_ALL)
         verify_container()
-        print("\n\nRunning test_container_isolation:\n")
+        print(Fore.CYAN + "\nRunning test_container_isolation:\n" + Style.RESET_ALL)
         test_container_isolation()
+        print(Fore.CYAN + "\nRunning verify_xcontainer:\n" + Style.RESET_ALL)
+        verify_xcontainer()
+        print(Fore.CYAN + "\nRunning verify_excontainer:\n" + Style.RESET_ALL)
+        verify_excontainer()
     elif SYSTEM == 'MACOS':
-        print("Running verify_container_mac:\n")
+        print(Fore.CYAN + "Running verify_container_mac:\n" + Style.RESET_ALL)
         verify_container_mac()
-        print("\nRunning verify_xcontainer_mac:\n")
+        print(Fore.CYAN + "\nRunning verify_xcontainer_mac:\n" + Style.RESET_ALL)
         verify_xcontainer_mac()
-        print("\nRunning verify_excontainer_mac:\n")
+        print(Fore.CYAN + "\nRunning verify_excontainer_mac:\n" + Style.RESET_ALL)
         verify_excontainer_mac()

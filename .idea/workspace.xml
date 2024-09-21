@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Code cleanup and some documentation">
+    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Updated README.md + Color prints">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xcontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/xcontainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +65,7 @@
       <workItem from="1726531326253" duration="4981000" />
       <workItem from="1726771415344" duration="3406000" />
       <workItem from="1726786611367" duration="143000" />
-      <workItem from="1726786813013" duration="26588000" />
+      <workItem from="1726786813013" duration="29375000" />
     </task>
     <task id="LOCAL-00001" summary="dd">
       <option name="closed" value="true" />
@@ -156,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726923363798</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Updated README.md + Color prints">
+      <option name="closed" value="true" />
+      <created>1726936576331</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1726936576331</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -225,6 +232,7 @@
     <MESSAGE value="More tests for X-Containers" />
     <MESSAGE value="Add skeleton for EXContainer" />
     <MESSAGE value="Code cleanup and some documentation" />
-    <option name="LAST_COMMIT_MESSAGE" value="Code cleanup and some documentation" />
+    <MESSAGE value="Updated README.md + Color prints" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated README.md + Color prints" />
   </component>
 </project>
