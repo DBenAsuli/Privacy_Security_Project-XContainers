@@ -3,13 +3,13 @@
 # Siwar Mansour
 # The Hebrew University of Jerusalem                      September 2024
 
-import os
 import shutil
-import subprocess
-from container import *
 from multiprocessing import Process, Queue
 
-def run_container_test(container_name, root_dir, command, result_queue, xcontainer= False):
+from xcontainer import *
+
+
+def run_container_test(container_name, root_dir, command, result_queue, xcontainer=False):
     if xcontainer:
         pass
     else:
@@ -17,7 +17,8 @@ def run_container_test(container_name, root_dir, command, result_queue, xcontain
     container.run(command, result_queue)
     print(f"{container_name} finished running {command}")
 
-def run_container_test_mac(container_name, root_dir, command, result_queue, xcontainer= False):
+
+def run_container_test_mac(container_name, root_dir, command, result_queue, xcontainer=False):
     container = Container(container_name, root_dir)
     print(f"Running command in container {container_name}: {command}")
     container.run(command, result_queue)
@@ -29,6 +30,7 @@ def run_container_test_mac(container_name, root_dir, command, result_queue, xcon
     print(f"Running command in container {container_name}: {command}")
     container.run_mac(command, result_queue)
     print(f"{container_name} finished running {command}")
+
 
 def clear_root_dir(root_dir):
     protected_dirs = {"bin", "lib", "usr"}
@@ -96,9 +98,10 @@ def verify_containers(root_dir="./root_dir"):
             print(f"Test passed for {container_name}.")
 
     if passed:
-        print("All container tests passed successfully!")
+        print("\nAll container tests passed successfully!")
     else:
         print("Some container tests failed.")
+
 
 def verify_containers_mac(root_dir="./root_dir"):
     processes = []
@@ -134,9 +137,10 @@ def verify_containers_mac(root_dir="./root_dir"):
             print(f"Test passed for {container_name}.")
 
     if passed:
-        print("All container tests passed successfully!")
+        print("\nAll container tests passed successfully!")
     else:
         print("Some container tests failed.")
+
 
 def test_container_isolation(root_dir="./root_dir"):
     processes = []
@@ -172,9 +176,10 @@ def test_container_isolation(root_dir="./root_dir"):
             print(f"Test passed for {container_name}.")
 
     if passed:
-        print("All container isolation tests passed successfully!")
+        print("\nAll container isolation tests passed successfully!")
     else:
         print("Some container isolation tests failed.")
+
 
 def test_container_isolation_mac(root_dir="./root_dir"):
     processes = []
@@ -210,12 +215,151 @@ def test_container_isolation_mac(root_dir="./root_dir"):
             print(f"Test passed for {container_name}.")
 
     if passed:
-        print("All container isolation tests passed successfully!")
+        print("\nAll container isolation tests passed successfully!")
     else:
         print("Some container isolation tests failed.")
 
+def test_xcontainer_mac():
+    hypervisor = HypervisorService()
+    xcontainer = XContainer("XContainer_1", "./root_dir_x", hypervisor)
 
-# Run the tests
+    test_results = []
+
+    # Test secure command execution with encryption and decryption
+    try:
+        print("--- Testing Command Encryption and Decryption ---")
+        command = "echo 'Hello from XContainer 1' > testfile_x1.txt"
+        output_1 = xcontainer.run_secure_command(command)
+        assert output_1 == "", "Expected no output after command execution"
+        test_results.append(("Command Encryption and Decryption", True))
+    except Exception as e:
+        test_results.append(("Command Encryption and Decryption", False, str(e)))
+
+    # Verify that the file content is encrypted and decrypted properly
+    try:
+        print("\n--- Testing File Content After Encryption ---")
+        output_2 = xcontainer.run_secure_command("cat testfile_x1.txt")
+        assert output_2.strip().lower() == "Hello from XContainer 1".strip().lower(), "File content mismatch"
+        test_results.append(("File Content After Encryption", True))
+    except Exception as e:
+        test_results.append(("File Content After Encryption", False, str(e)))
+
+    # Check if the file I/O is offloaded to the hypervisor
+    try:
+        print("\n--- Testing Task Offloading to Hypervisor ---")
+        hypervisor_output = xcontainer.offload_to_hypervisor("file_io", "testfile_x1.txt")
+        assert "Handled" in hypervisor_output, "Hypervisor did not handle the task correctly"
+        test_results.append(("Task Offloading to Hypervisor", True))
+    except Exception as e:
+        test_results.append(("Task Offloading to Hypervisor", False, str(e)))
+
+    # Testing encryption in memory
+    try:
+        print("\n--- Testing Memory Encryption ---")
+        sensitive_data = "Sensitive Data"
+        encrypted_data = xcontainer.encrypt_memory(sensitive_data)
+        decrypted_data = xcontainer.decrypt_memory(encrypted_data)
+        assert decrypted_data == sensitive_data, "Decrypted data does not match original"
+        test_results.append(("Memory Encryption", True))
+    except Exception as e:
+        test_results.append(("Memory Encryption", False, str(e)))
+
+    try:
+        print("\n--- Testing Encryption of Multiple Commands ---")
+
+        # Encryption of Multiple Commands (with expected decrypted output):
+        commands = [
+            ("echo 'Confidential info 1' > secret_file1.txt", ""),  # echo doesn't produce output
+            ("echo 'Confidential info 2' > secret_file2.txt", ""),  # echo doesn't produce output
+            ("cat secret_file1.txt", "Confidential info 1"),  # Expect decrypted content
+            ("cat secret_file2.txt", "Confidential info 2")  # Expect decrypted content
+        ]
+
+        for cmd, expected_output in commands:
+            result = xcontainer.run_secure_command(cmd)
+            assert result.strip().lower() == expected_output.strip().lower(), f"Unexpected output for command: {cmd}\nExpected: {expected_output}\nGot: {result}"
+
+        test_results.append(("Encryption of Multiple Commands", True))
+
+        # Simulate an adversary trying to directly access the files without using the XContainer
+        print("\n--- Testing Adversary Access to Encrypted Files ---")
+
+        # Simulate adversary trying to access the file directly without decryption
+        adversary_command = "cat secret_file1.txt"
+
+        # Run the command as an "adversary" directly
+        try:
+            result_adversary = subprocess.run(adversary_command, shell=True, cwd="./root_dir_x", stdout=subprocess.PIPE,
+                                              stderr=subprocess.PIPE)
+            adversary_output = result_adversary.stdout.decode("utf-8").strip() or result_adversary.stderr.decode(
+                "utf-8").strip()
+
+            assert "Confidential info 1" not in adversary_output, "Adversary was able to read confidential information!"
+            assert "no such file" in adversary_output.lower() or adversary_output.strip() != "", "Adversary got unexpected readable output!"
+
+            test_results.append(("Adversary Access Prevention", True))  # Test passed
+            print("Adversary access prevention: PASSED")
+
+        except Exception as e:
+            print(f"Adversary access test failed: {e}")
+            test_results.append(("Adversary Access Prevention", False))  # Test failed
+            print("Adversary access prevention: FAILED")
+
+
+    except AssertionError as e:
+        print(e)
+        test_results.append(("Encryption of Multiple Commands", False))  # Test failed
+        test_results.append(
+            ("Adversary Access Prevention", False))  # If we failed earlier, we assume adversary might also succeed
+    try:
+        print("\n--- Testing Hypervisor Offloading for Sensitive I/O ---")
+        for cmd in ["secret_file1.txt", "secret_file2.txt"]:
+            hypervisor_result = xcontainer.offload_to_hypervisor("file_io", cmd)
+            assert "Handled" in hypervisor_result, "Hypervisor did not handle I/O correctly"
+
+        test_results.append(("Hypervisor Offloading for Sensitive I/O", True))
+    except Exception as e:
+        test_results.append(("Hypervisor Offloading for Sensitive I/O", False, str(e)))
+
+    print("\n--- Test Results ---")
+    for test, passed, *reason in test_results:
+        status = "PASSED" if passed else "FAILED"
+        reason_message = f" - Reason: {reason[0]}" if reason else ""
+        print(f"{test}: {status}{reason_message}")
+
+    if all(result[1] for result in test_results):
+        print("\nAll tests completed successfully!")
+    else:
+        print("Some tests failed. Check the output for details.")
+
+# Run 'regular' Containers tests
+def run_containers_tests(SYSTEM = 'LINUX'):
+    if SYSTEM == 'LINUX':
+        print("Running verify_containers:\n")
+        verify_containers()
+        print("\n\nRunning test_container_isolation:\n")
+        test_container_isolation()
+    elif SYSTEM == 'MACOS':
+        print("Running verify_containers_mac:\n")
+        verify_containers_mac()
+
+
+# Run 'Traditional' X-Containers tests
+def run_xcontainers_tests(SYSTEM = 'LINUX'):
+    if SYSTEM == 'LINUX':
+       pass #TODO
+    elif SYSTEM == 'MACOS':
+        print("Running test_xcontainer_mac:\n")
+        test_xcontainer_mac()
+
+# Run our enhanced X-Containers tests
+def run_enhanced_xcontainers_tests(SYSTEM = 'LINUX'):
+    if SYSTEM == 'LINUX':
+        pass #TODO
+    elif SYSTEM == 'MACOS':
+        pass  # TODO
+
+# Run all the tests
 if __name__ == "__main__":
     os_name = input("Enter 'L' for Linux and 'M' for Mac OS:")
     if os_name.upper() == "L":
@@ -234,3 +378,6 @@ if __name__ == "__main__":
     elif SYSTEM == 'MACOS':
         print("Running verify_containers_mac:\n")
         verify_containers_mac()
+        print("\n\nRunning test_xcontainer_mac:\n")
+        test_xcontainer_mac()
+
