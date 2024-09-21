@@ -3,14 +3,13 @@
 # Siwar Mansour
 # The Hebrew University of Jerusalem                      September 2024
 
+from container import *
 from cryptography.fernet import Fernet
 
-from container import *
-
 class XContainer(Container):
-    def __init__(self, name, root_dir, hypervisor_service):
+    def __init__(self, name, root_dir, hypervisor):
         super().__init__(name, root_dir)
-        self.hypervisor_service = hypervisor_service
+        self.hypervisor = hypervisor
         self.encryption_key = Fernet.generate_key()
         self.cipher = Fernet(self.encryption_key)
 
@@ -34,9 +33,10 @@ class XContainer(Container):
         return decrypted_data.decode()
 
     def offload_to_hypervisor(self, task_type, data):
-        return self.hypervisor_service.handle_task(task_type, data)
+        return self.hypervisor.handle_task(task_type, data)
 
-    def run_secure_command(self, command):
+    # Run a command securely inside the x-container (MacOS Version)
+    def run_secure_command_mac(self, command):
         print(f"Running secure command in container {self.name}: {command}")
         try:
             # Encrypt memory before running the command
@@ -74,8 +74,8 @@ class XContainer(Container):
         return self.decrypt_file(f"{self.root_dir}/{file_path}")
 
 
-# Hypervisor Service Simulation
-class HypervisorService:
+# Hypervisor Simulation
+class Hypervisor:
     def handle_task(self, task_type, data):
         if task_type == "file_io":
             print(f"Hypervisor handling file I/O for container: {data}")

@@ -11,6 +11,7 @@ class Container:
         self.name = name
         self.root_dir = root_dir
 
+    # Run a command inside the container (Linux Version , Defalut)
     def run(self, command, result_queue):
         print(f"Running command in our container {self.name}: {command}")
         try:
@@ -26,12 +27,10 @@ class Container:
         finally:
             os.chdir("/")
 
+    # Run a command inside the container (MacOS Version)
     def run_mac(self, command, result_queue):
         print(f"Running command in our container {self.name}: {command}")
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    cwd=self.root_dir)
         output, error = process.communicate()
         result_queue.put((self.name, output.decode().strip()))
-
-    #    if process.returncode != 0:
-    #        raise Exception(error.decode().strip())

@@ -4,8 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="More tests for X-Containers">
-      <change afterPath="$PROJECT_DIR$/enhanced_xcontainers.py" afterDir="false" />
+    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Add skeleton for EXContainer">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/container.py" beforeDir="false" afterPath="$PROJECT_DIR$/container.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enhanced_xcontainers.py" beforeDir="false" afterPath="$PROJECT_DIR$/excontainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xcontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/xcontainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +68,7 @@
       <workItem from="1726531326253" duration="4981000" />
       <workItem from="1726771415344" duration="3406000" />
       <workItem from="1726786611367" duration="143000" />
-      <workItem from="1726786813013" duration="13756000" />
+      <workItem from="1726786813013" duration="19918000" />
     </task>
     <task id="LOCAL-00001" summary="dd">
       <option name="closed" value="true" />
@@ -137,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726887959109</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Add skeleton for EXContainer">
+      <option name="closed" value="true" />
+      <created>1726888061047</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1726888061047</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,6 +217,7 @@
     <MESSAGE value="Add support for running on MacOS, Code Cleanup and reordering" />
     <MESSAGE value="Adjustments for MacOS tests + Initial implementation of X-Containers" />
     <MESSAGE value="More tests for X-Containers" />
-    <option name="LAST_COMMIT_MESSAGE" value="More tests for X-Containers" />
+    <MESSAGE value="Add skeleton for EXContainer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add skeleton for EXContainer" />
   </component>
 </project>
