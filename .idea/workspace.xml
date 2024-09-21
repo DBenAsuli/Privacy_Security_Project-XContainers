@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Add skeleton for EXContainer">
+    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Code cleanup and some documentation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/container.py" beforeDir="false" afterPath="$PROJECT_DIR$/container.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/enhanced_xcontainers.py" beforeDir="false" afterPath="$PROJECT_DIR$/excontainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xcontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/xcontainer.py" afterDir="false" />
     </list>
@@ -68,7 +66,7 @@
       <workItem from="1726531326253" duration="4981000" />
       <workItem from="1726771415344" duration="3406000" />
       <workItem from="1726786611367" duration="143000" />
-      <workItem from="1726786813013" duration="19918000" />
+      <workItem from="1726786813013" duration="26588000" />
     </task>
     <task id="LOCAL-00001" summary="dd">
       <option name="closed" value="true" />
@@ -150,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726888061047</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Code cleanup and some documentation">
+      <option name="closed" value="true" />
+      <created>1726923363798</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1726923363798</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -218,6 +224,7 @@
     <MESSAGE value="Adjustments for MacOS tests + Initial implementation of X-Containers" />
     <MESSAGE value="More tests for X-Containers" />
     <MESSAGE value="Add skeleton for EXContainer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add skeleton for EXContainer" />
+    <MESSAGE value="Code cleanup and some documentation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Code cleanup and some documentation" />
   </component>
 </project>

@@ -13,10 +13,10 @@ class XContainer(Container):
         self.encryption_key = Fernet.generate_key()
         self.cipher = Fernet(self.encryption_key)
 
-    def encrypt_memory(self, data):
+    def encrypt_command(self, data):
         return self.cipher.encrypt(data.encode())
 
-    def decrypt_memory(self, encrypted_data):
+    def decrypt_command(self, encrypted_data):
         return self.cipher.decrypt(encrypted_data).decode()
 
     def encrypt_file(self, file_path):
@@ -35,16 +35,22 @@ class XContainer(Container):
     def offload_to_hypervisor(self, task_type, data):
         return self.hypervisor.handle_task(task_type, data)
 
+    # Run a command securely inside the x-container (Linux Version)
+    def run_secure_command(self, command):
+        print(f"Running secure command in container {self.name}: {command}")
+        # TODO SIWAR Implement
+        pass
+
     # Run a command securely inside the x-container (MacOS Version)
     def run_secure_command_mac(self, command):
         print(f"Running secure command in container {self.name}: {command}")
         try:
             # Encrypt memory before running the command
-            encrypted_command = self.encrypt_memory(command)
+            encrypted_command = self.encrypt_command(command)
             print(f"Encrypted command: {encrypted_command}")
 
-            # Decrypt before execution (in a real scenario, this happens inside an enclave)
-            decrypted_command = self.decrypt_memory(encrypted_command)
+            # Decrypt before execution
+            decrypted_command = self.decrypt_command(encrypted_command)
             result = subprocess.run(decrypted_command, shell=True, cwd=self.root_dir, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
 
@@ -57,20 +63,20 @@ class XContainer(Container):
             # If it's a `cat` command, decrypt the file content before returning the result
             if command.startswith("cat "):
                 file_name = command.split("cat ", 1)[1].strip()
-                return self.read_file_securely(file_name)
+                return self.read_secure_file(file_name)
 
             # Encrypt the output
-            encrypted_output = self.encrypt_memory(result.stdout.decode("utf-8").strip())
+            encrypted_output = self.encrypt_command(result.stdout.decode("utf-8").strip())
             print(f"Encrypted output: {encrypted_output}")
 
             # Decrypt the output for external use
-            output = self.decrypt_memory(encrypted_output)
+            output = self.decrypt_command(encrypted_output)
             return output
         except Exception as e:
             print(f"Error in XContainer {self.name}: {e}")
             return str(e)
 
-    def read_file_securely(self, file_path):
+    def read_secure_file(self, file_path):
         return self.decrypt_file(f"{self.root_dir}/{file_path}")
 
 
