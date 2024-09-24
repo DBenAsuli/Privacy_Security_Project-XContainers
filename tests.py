@@ -5,7 +5,6 @@
 
 import shutil
 from excontainer import *
-from colorama import Fore, Style
 from multiprocessing import Process, Queue
 
 

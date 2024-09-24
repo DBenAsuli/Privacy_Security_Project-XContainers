@@ -5,6 +5,7 @@
 
 from pki import *
 from xcontainer import *
+from colorama import Fore, Style
 
 
 class EXContainer(XContainer):
@@ -18,7 +19,7 @@ class EXContainer(XContainer):
 
     # Requesting a certificate from CA.
     # The user can specify the validity period of the certificate, default is 1 hour.
-    # User also specify which CA it requests the certificate from- either an external
+    # User also specify which CA it requests the certificate from either an external
     # one or the entity itself.
     def request_certificate(self, ca, hours_limit=1):
         self.certificate, self.valid_from, self.valid_to = ca.sign_certificate(entity_public_key=self.public_key,
@@ -60,7 +61,6 @@ class EXContainer(XContainer):
         return self.valid_to
 
 
-
 # Secured Hypervisor Simulation
 # Serves as the Relying Party in PKI Protocol
 class RelyingHypervisor:
@@ -68,11 +68,11 @@ class RelyingHypervisor:
         self.key = RSA.generate(2048)
         self.public_key = self.key.publickey()
 
-    def verify_signed_data(self, entity, ca, data, signature):
+    def verify_container(self, entity_public_key, entity_name, valid_from, valid_to, ca, data, signature):
+
         # First verify the validity of the Entity's certificate
-        if not self.verify_certificate(entity_public_key=entity.get_public_key(), entity_name=entity.get_name(), ca=ca,
-                                       signature=entity.get_certificate(), valid_from=entity.get_valid_from(),
-                                       valid_to=entity.get_valid_to()):
+        if not self.verify_certificate(entity_public_key=entity_public_key, entity_name=entity_name, ca=ca,
+                                       signature=signature, valid_from=valid_from, valid_to=valid_to):
             return False
 
         # If it has a valid certificate,
@@ -128,14 +128,22 @@ class RelyingHypervisor:
     def challenge(self):
         pass
 
-    # TODO Implement using PKI Flow
-    def handle_task(self, task_type, data):
+    def handle_task(self, task_type, data, entity_public_key, entity_name, signature, valid_from, valid_to, ca, ):
+
+        if not self.verify_container(data=data, entity_public_key=entity_public_key, entity_name=entity_name,
+                                     signature=signature, valid_from=valid_from, valid_to=valid_to, ca=ca):
+            return "Failed to authenticate EX-Container"
+
+        print(Fore.GREEN + f"Authentication for EX-Container PASSED successfully" + Style.RESET_ALL)
+
+        decrypted_data = self.decrypt_data(encrypted_data=data)
+
         if task_type == "file_io":
-            print(f"Hypervisor handling file I/O for container: {data}")
-            return f"Handled file I/O: {data}"
+            print(f"Hypervisor handling file I/O for container: {decrypted_data}")
+            return f"Handled file I/O: {decrypted_data}"
         elif task_type == "network_io":
-            print(f"Hypervisor handling network I/O for container: {data}")
-            return f"Handled network I/O: {data}"
+            print(f"Hypervisor handling network I/O for container: {decrypted_data}")
+            return f"Handled network I/O: {decrypted_data}"
         else:
             return "Unsupported task type"
 
