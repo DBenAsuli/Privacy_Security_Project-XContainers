@@ -7,8 +7,9 @@
 1. container.py – Basic implementation of the traditional Containers methodology.
 2. xcontainer.py - Basic implementation of the X-Containers methodology. Also includes implementation of a Hypervisor class.
 3. excontainer.py – Implementation of our Enhanced X-Containers methodology.
-4. tests.py – Several test flows to verify the functionality of all above classes.
-5. main.py – Code that runs all tests for all above classes.
+4. pki.py – Implementation of utilities for PKI Protocol.
+5. tests.py – Several test flows to verify the functionality of all above classes.
+6. main.py – Code that runs all tests for all above classes.
 
 #### Important Notes:
 1. The code requires directories inside run directory to run the containers in. The default names are: "root_dir", "root_dir_x" and "root_dir_ex" for Containers, X-Containers and Enhanced X-Containers respectively.
