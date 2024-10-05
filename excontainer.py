@@ -3,19 +3,22 @@
 # Siwar Mansour
 # The Hebrew University of Jerusalem                      September 2024
 
+from colorama import Fore, Style
+
 from pki import *
 from xcontainer import *
-from colorama import Fore, Style
 
 
 class EXContainer(XContainer):
-    def __init__(self, name, root_dir, hypervisor):
+    def __init__(self, name, root_dir, hypervisor, ca):
         super().__init__(name, root_dir, hypervisor)
         self.key = RSA.generate(2048)
         self.public_key = self.key.publickey()
+        self.ca = ca
         self.certificate = None
         self.valid_from = None
         self.valid_to = None
+        self.recipient_public_key = hypervisor.public_key
 
     # Requesting a certificate from CA.
     # The user can specify the validity period of the certificate, default is 1 hour.
@@ -33,17 +36,81 @@ class EXContainer(XContainer):
             raise ValueError("Entity does not have a valid certificate.")
 
         # If it has a certificate, it uses it's provate key to sign the data
-        data_hash = SHA256.new(data.encode('utf-8'))
+        data_hash = SHA256.new(data)
         signature = pkcs1_15.new(self.key).sign(data_hash)
-        return base64.b64encode(signature).decode('utf-8')
+        return base64.b64encode(signature)
 
     # The entity encrypts the data for verification of Data Integrity.
     def encrypt_data(self, data, recipient_public_key):
         cipher = PKCS1_OAEP.new(recipient_public_key)
-        encrypted_data = cipher.encrypt(data.encode('utf-8'))
-        return base64.b64encode(encrypted_data).decode('utf-8')
+        encrypted_data = cipher.encrypt(data)
+        return base64.b64encode(encrypted_data)
 
     # TODO Re-implement X-Containers methods using above methods
+    def encrypt_command(self, data):
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        return self.encrypt_data(data, self.recipient_public_key)
+
+    def encrypt_file(self, file_path):
+        with open(file_path, 'rb') as f:
+            file_data = f.read()
+        encrypted_data = self.encrypt_data(file_data, self.recipient_public_key)
+        with open(file_path, 'wb') as f:
+            f.write(encrypted_data)
+
+    def offload_to_hypervisor(self, task_type, data):
+        encrypted_command = self.encrypt_command(data)
+        self.signature = self.sign_data(data=encrypted_command)
+        return self.hypervisor.handle_task(task_type=task_type, data=encrypted_command, entity_name=self.name,
+                                           entity_public_key=self.public_key, signature=self.certificate,
+                                           valid_from=self.valid_from, valid_to=self.valid_to, ca=self.ca,
+                                           data_signature=self.signature)
+
+    # Run a command securely inside the x-container (Linux Version)
+    def run_secure_command(self, command):
+        print(f"Running secure command in container {self.name}: {command}")
+        # TODO SIWAR Implement
+        pass
+
+    # Run a command securely inside the x-container (MacOS Version)
+    def run_secure_command_mac(self, command):
+        print(f"Running secure command in container {self.name}: {command}")
+        try:
+            # Encrypt memory before running the command
+            encrypted_command = self.encrypt_command(command)
+            print(f"Encrypted command: {encrypted_command}")
+
+            # Decrypt before execution
+            decrypted_command = self.hypervisor.decrypt_command(encrypted_command)
+
+            result = subprocess.run(decrypted_command, shell=True, cwd=self.root_dir, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+
+            # Check if any file is created, and encrypt the file content
+            if ">" in command:
+                file_path = command.split(">")[-1].strip()
+                file_path = f"{self.root_dir}/{file_path}"
+                self.encrypt_file(file_path)  # Encrypt the file after creation
+
+            # If it's a `cat` command, decrypt the file content before returning the result
+            if command.startswith("cat "):
+                file_name = command.split("cat ", 1)[1].strip()
+                return self.read_secure_file(file_name)
+
+            # Encrypt the output
+            encrypted_output = self.encrypt_command(result.stdout.strip())
+            print(f"Encrypted output: {encrypted_output}")
+
+            # Decrypt the output for external use
+            output = self.hypervisor.decrypt_command(encrypted_output)
+            return output
+        except Exception as e:
+            print(f"Error in XContainer {self.name}: {e}")
+            return str(e)
+
+    def read_secure_file(self, file_path):
+        return self.hypervisor.decrypt_file(f"{self.root_dir}/{file_path}")
 
     def get_name(self):
         return self.name
@@ -68,19 +135,28 @@ class RelyingHypervisor:
         self.key = RSA.generate(2048)
         self.public_key = self.key.publickey()
 
-    def verify_container(self, entity_public_key, entity_name, valid_from, valid_to, ca, data, signature):
+    def verify_container(self, entity_public_key, entity_name, valid_from, valid_to, ca, data, signature,
+                         data_signature):
 
         # First verify the validity of the Entity's certificate
         if not self.verify_certificate(entity_public_key=entity_public_key, entity_name=entity_name, ca=ca,
                                        signature=signature, valid_from=valid_from, valid_to=valid_to):
+            print(Fore.RED + f"Authentication for EX-Container's certificate FAILED " + Style.RESET_ALL)
             return False
 
+        print("aaaaaaa1")
         # If it has a valid certificate,
         # Check authenticity of the data signed by the entity
-        data_hash = SHA256.new(data.encode('utf-8'))
-        signature = base64.b64decode(signature.encode('utf-8'))
+        data_hash = SHA256.new(data)
+        print("aaaaaaa2")
+
+        signature = base64.b64decode(data_signature)
+        print("aaaaaaa3")
+
         try:
-            pkcs1_15.new(entity.get_public_key()).verify(data_hash, signature)
+            print("aaaaaaa4")
+
+            pkcs1_15.new(entity_public_key).verify(data_hash, signature)
             return True
         except (ValueError, TypeError):
             return False
@@ -91,20 +167,29 @@ class RelyingHypervisor:
 
         # Verify the signature was not revoked by CA
         if not ca.verify_signature_validity(entity_name=entity_name, signature=signature):
+            print("babababababb0")
             return False
 
+        print("babababababb1")
         # Concatenate the key, the data and the valid timestamp to the signed string
         certificate_data = ca.get_name().encode('utf-8') + entity_name.encode(
             'utf-8') + entity_public_key.export_key() + valid_from.encode('utf-8') + valid_to.encode('utf-8')
+        print("babababababb2")
+
         certificate_hash = SHA256.new(certificate_data)
+        print("babababababb3")
+
         try:
             # Verify the certificate itself based on the string's hash
             pkcs1_15.new(ca.get_public_key()).verify(certificate_hash, signature)
+            print("babababababb4")
 
             # Verify timestamp validity
             current_datetime = datetime.datetime.now()
             valid_from_dt = datetime.datetime.strptime(valid_from, '%Y-%m-%d %H:%M:%S')
             valid_to_dt = datetime.datetime.strptime(valid_to, '%Y-%m-%d %H:%M:%S')
+            print("babababababb5")
+
             if valid_from_dt <= current_datetime <= valid_to_dt:
                 return True
             else:
@@ -118,8 +203,17 @@ class RelyingHypervisor:
     # The party decrypts the data for verification of Data Integrity.
     def decrypt_data(self, encrypted_data):
         cipher = PKCS1_OAEP.new(self.key)
-        decrypted_data = cipher.decrypt(base64.b64decode(encrypted_data.encode('utf-8')))
-        return decrypted_data.decode('utf-8')
+        decrypted_data = cipher.decrypt(base64.b64decode(encrypted_data))
+        return decrypted_data
+
+    def decrypt_file(self, file_path):
+        with open(file_path, 'rb') as f:
+            encrypted_data = f.read()
+        decrypted_data = self.decrypt_data(encrypted_data)
+        return decrypted_data.decode()
+
+    def decrypt_command(self, encrypted_data):
+        return self.decrypt_data(encrypted_data).decode()
 
     def request_certificate_revokation(self, ca, entity_name, signature):
         ca.revoke_certificate(entity_name=entity_name, signature=signature)
@@ -128,15 +222,40 @@ class RelyingHypervisor:
     def challenge(self):
         pass
 
-    def handle_task(self, task_type, data, entity_public_key, entity_name, signature, valid_from, valid_to, ca, ):
+    def verify_signed_data(self, entity_public_key, entity_name, signature, valid_from, valid_to, ca, data):
+        # First verify the validity of the Entity's certificate
+        if not self.verify_certificate(entity_public_key=entity_public_key, entity_name=entity_name, ca=ca,
+                                       signature=signature, valid_from=valid_from, valid_to=valid_to):
+            return False
 
+        # If it has a valid certificate,
+        # Check authenticity of the data signed by the entity
+        data_hash = SHA256.new(data)
+        signature = base64.b64decode(signature)
+        try:
+            pkcs1_15.new(entity.get_public_key()).verify(data_hash, signature)
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    def handle_task(self, task_type, data, entity_public_key, entity_name, signature, data_signature, valid_from,
+                    valid_to, ca):
+
+        decrypted_data = self.decrypt_data(encrypted_data=data)
         if not self.verify_container(data=data, entity_public_key=entity_public_key, entity_name=entity_name,
-                                     signature=signature, valid_from=valid_from, valid_to=valid_to, ca=ca):
+                                     signature=signature, valid_from=valid_from, valid_to=valid_to, ca=ca,
+                                     data_signature=data_signature):
+            print(Fore.RED + f"Authentication for EX-Container FAILED " + Style.RESET_ALL)
             return "Failed to authenticate EX-Container"
 
         print(Fore.GREEN + f"Authentication for EX-Container PASSED successfully" + Style.RESET_ALL)
 
-        decrypted_data = self.decrypt_data(encrypted_data=data)
+        is_verified = self.verify_signed_data(entity_public_key=entity_public_key, entity_name=entity_name,
+                                              signature=data_signature, valid_from=valid_from, valid_to=valid_to, ca=ca,
+                                              data=data)
+
+        if not is_verified:
+            print(Fore.RED + "\nVerification of signed data failed\n" + Style.RESET_ALL)
 
         if task_type == "file_io":
             print(f"Hypervisor handling file I/O for container: {decrypted_data}")

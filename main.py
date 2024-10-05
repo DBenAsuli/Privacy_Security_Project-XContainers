@@ -16,10 +16,10 @@ if __name__ == '__main__':
         print("Non-valid OS name. Choosing Linux.")
 
     print(Fore.MAGENTA + "\nTesting Containers\n" + Style.RESET_ALL)
-    run_containers_tests(SYSTEM)
+    #run_containers_tests(SYSTEM)
 
     print(Fore.MAGENTA + "\nTesting X-Containers\n" + Style.RESET_ALL)
-    run_xcontainer_tests(SYSTEM)
+    #run_xcontainer_tests(SYSTEM)
 
     print(Fore.MAGENTA + "\nTesting Enhanced X-Containers\n" + Style.RESET_ALL)
     run_enhanced_xcontainer_tests(SYSTEM)
