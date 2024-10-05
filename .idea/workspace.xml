@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Implement PKI Flow for RelyingContainer">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/excontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/excontainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pki.py" beforeDir="false" afterPath="$PROJECT_DIR$/pki.py" afterDir="false" />
+    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Integrate PKI Features to excontainer.py">
       <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +63,7 @@
       <workItem from="1726531326253" duration="4981000" />
       <workItem from="1726771415344" duration="3406000" />
       <workItem from="1726786611367" duration="143000" />
-      <workItem from="1726786813013" duration="41736000" />
+      <workItem from="1726786813013" duration="42066000" />
     </task>
     <task id="LOCAL-00001" summary="dd">
       <option name="closed" value="true" />
@@ -197,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727182048673</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Integrate PKI Features to excontainer.py">
+      <option name="closed" value="true" />
+      <created>1728159332083</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1728159332083</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -271,6 +275,7 @@
     <MESSAGE value="Some code cleanup" />
     <MESSAGE value="Initial migration of PKI from ex2 + Initial implementation of excontainer.py classes" />
     <MESSAGE value="Implement PKI Flow for RelyingContainer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement PKI Flow for RelyingContainer" />
+    <MESSAGE value="Integrate PKI Features to excontainer.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Integrate PKI Features to excontainer.py" />
   </component>
 </project>

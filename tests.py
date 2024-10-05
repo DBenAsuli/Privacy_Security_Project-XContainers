@@ -758,9 +758,9 @@ if __name__ == "__main__":
         print(Fore.CYAN + "\nRunning verify_xcontainer:\n" + Style.RESET_ALL)
         verify_xcontainer()
         print(Fore.CYAN + "\nRunning verify_excontainer:\n" + Style.RESET_ALL)
+        verify_excontainer()
         print(Fore.CYAN + "\nRunning unique_verify_excontainer:\n" + Style.RESET_ALL)
         unique_verify_excontainer()
-        verify_excontainer()
     elif SYSTEM == 'MACOS':
         print(Fore.CYAN + "Running verify_container_mac:\n" + Style.RESET_ALL)
         verify_container_mac()
