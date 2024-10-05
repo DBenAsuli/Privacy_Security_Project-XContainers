@@ -1,7 +1,7 @@
 # Advanced Topics in Online Privacy and Cybersecurity     Project
 # Dvir Ben Asuli                                          318208816
-# Siwar Mansour
-# The Hebrew University of Jerusalem                      September 2024
+# Siwar Mansour                                           207527680
+# The Hebrew University of Jerusalem                      October 2024
 
 import random
 import string

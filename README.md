@@ -19,7 +19,6 @@ The code also includes many tests to verify the behaviour of all the classes and
 1. The code requires directories inside the main run directory to run the containers inside. The default names for such directories are: "root_dir", "root_dir_x" and "root_dir_ex" for Containers, X-Containers and Enhanced X-Containers respectively. Other names can be provided as input to the run fucntions.
 2. In order for the containers to be able to run inside these directories, they need to include /bin and /usr and /lib directories from the OS in order to work properly. It may differ between computers and OS's.
 3. The tests have the option to run on Linux (Default) or MacOS. When running the code, you will be asked to type "L" for Linux usage or "M" for MacOS usage. When typing invalid input, Linux will be chosen.
-4. Packages to be installed: # TODO 
 
 After all conditions are satisfied, just run main.py in the main directory in order to test all the different classes and execute all the tests we implemented.
 

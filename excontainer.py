@@ -1,7 +1,7 @@
 # Advanced Topics in Online Privacy and Cybersecurity     Project
 # Dvir Ben Asuli                                          318208816
-# Siwar Mansour
-# The Hebrew University of Jerusalem                      September 2024
+# Siwar Mansour                                           207527680
+# The Hebrew University of Jerusalem                      October 2024
 
 from colorama import Fore, Style
 
@@ -221,7 +221,7 @@ class RelyingHypervisor:
     def request_certificate_revokation(self, ca, entity_name, signature):
         ca.revoke_certificate(entity_name=entity_name, signature=signature)
 
-    # TODO Implement "challenge" flow
+    # TODO Siwar Implement "challenge" flow
     def challenge(self):
         pass
 
