@@ -26,7 +26,6 @@ if __name__ == '__main__':
     res &= run_enhanced_xcontainer_tests(SYSTEM)
 
     if res == True:
-        print(Fore.GREEN + "\nALL TESTS PASSED! \n" + Style.RESET_ALL)
+        print(Fore.GREEN +"\033[1m\nALL TESTS PASSED :) \n\033[0m" + Style.RESET_ALL)
     else:
-        print(Fore.RED + "\nSOME TESTS FAILED :( \n" + Style.RESET_ALL)
-
+        print(Fore.RED +"\033[1m\nSOME TESTS FAILED :( \n\033[0m" + Style.RESET_ALL)

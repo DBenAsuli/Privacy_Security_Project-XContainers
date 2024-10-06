@@ -465,7 +465,6 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         return False
 
 
-
 # Run tests for Enhanced X-Container class (Linux)
 def verify_excontainer(root_dir="./root_dir_ex"):
     hypervisor_1 = Hypervisor()
@@ -678,7 +677,6 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
         return False
 
 
-
 # Run unique tests for Enhanced X-Container class (Linux)
 def unique_verify_excontainer(root_dir="./root_dir_ex"):
     ca = CA()
@@ -700,13 +698,13 @@ def unique_verify_excontainer(root_dir="./root_dir_ex"):
     clear_root_dir(root_dir)
 
     # TODO IMPLEMENT SIWAR
-        
-        
+
+
 # Run unique tests for Enhanced X-Container class (MacOS)
 def unique_verify_excontainer_mac(root_dir="./root_dir_ex"):
     ca = CA()  # Certificate Authority for EXContainers
     hypervisor_1 = RelyingHypervisor()  # Hypervisor for Enhanced X-Containers
-    hypervisor_2 = Hypervisor() # Hypervisor for 'regular'' X-Containers
+    hypervisor_2 = Hypervisor()  # Hypervisor for 'regular'' X-Containers
 
     # Create an enhanced X-Containers with PKI
     excontainer_1 = EXContainer(name="EXContainer_1", root_dir=root_dir, hypervisor=hypervisor_1, ca=ca)

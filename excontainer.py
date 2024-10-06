@@ -61,6 +61,7 @@ class EXContainer(XContainer):
     def offload_to_hypervisor(self, task_type, data):
         encrypted_command = self.encrypt_command(data)
         self.signature = self.sign_data(data=encrypted_command)
+
         return self.hypervisor.handle_task(task_type=task_type, data=encrypted_command, entity_name=self.name,
                                            entity_public_key=self.public_key, signature=self.certificate,
                                            valid_from=self.valid_from, valid_to=self.valid_to, ca=self.ca,
@@ -79,7 +80,6 @@ class EXContainer(XContainer):
 
             # Encrypt memory before running the command
             encrypted_command = self.encrypt_command(command)
-            print(f"Encrypted command: {encrypted_command}")
 
             # Decrypt before execution
             decrypted_command = self.hypervisor.decrypt_command(encrypted_command)
@@ -100,7 +100,6 @@ class EXContainer(XContainer):
 
             # Encrypt the output
             encrypted_output = self.encrypt_command(result.stdout.strip())
-            print(f"Encrypted output: {encrypted_output}")
 
             # Decrypt the output for external use
             output = self.hypervisor.decrypt_command(encrypted_output)
@@ -119,10 +118,10 @@ class EXContainer(XContainer):
         try:
             sender_public_key.verify(signed_message)  # Verification of signature
             message = signed_message.decode('utf-8')  # Assuming signature contains the original message
-            print(f"{self.name} received a secure message: {message}")
+            print(f"{self.name} EXContainer -received a secure message: {message}")
             return message
         except InvalidSignature:
-            raise Exception(f"Message signature verification failed for {self.name}")
+            raise Exception(f"EXContainer - Message signature verification failed for {self.name}")
 
     def read_secure_file(self, file_path):
         return self.hypervisor.decrypt_file(f"{self.root_dir}/{file_path}")
@@ -155,7 +154,8 @@ class RelyingHypervisor:
 
         # First verify the validity of the Entity's certificate
         if not self.verify_certificate(entity_public_key=entity_public_key, entity_name=entity_name, ca=ca,
-                                       signature=signature, valid_from=valid_from, valid_to=valid_to, data_signature = data_signature):
+                                       signature=signature, valid_from=valid_from, valid_to=valid_to,
+                                       data_signature=data_signature):
             print(Fore.RED + f"Authentication for EX-Container's certificate FAILED " + Style.RESET_ALL)
             return False
 
@@ -176,6 +176,7 @@ class RelyingHypervisor:
 
         # Verify the signature was not revoked by CA
         if not ca.verify_signature_validity(entity_name=entity_name, signature=signature):
+            print(Fore.RED + f"Authentication for EX-Container's signature validity FAILED " + Style.RESET_ALL)
             return False
 
         # Concatenate the key, the data and the valid timestamp to the signed string
@@ -183,10 +184,9 @@ class RelyingHypervisor:
             'utf-8') + entity_public_key.export_key() + valid_from.encode('utf-8') + valid_to.encode('utf-8')
 
         certificate_hash = SHA256.new(certificate_data)
-
         try:
             # Verify the certificate itself based on the string's hash
-            pkcs1_15.new(ca.get_public_key()).verify(certificate_hash, data_signature)
+            pkcs1_15.new(ca.get_public_key()).verify(certificate_hash, signature)
 
             # Verify timestamp validity
             current_datetime = datetime.datetime.now()
@@ -200,7 +200,7 @@ class RelyingHypervisor:
 
         except (ValueError, TypeError):
             # Some error occured during verification, the certificate is not valid
-            print("Verification failed")
+            print(Fore.RED + "Verification FAILED" + Style.RESET_ALL)
             return False
 
     # The party decrypts the data for verification of Data Integrity.
@@ -225,18 +225,21 @@ class RelyingHypervisor:
     def challenge(self):
         pass
 
-    def verify_signed_data(self, entity_public_key, entity_name, signature, valid_from, valid_to, ca, data, data_signature):
-        # First verify the validity of the Entity's certificate
+    def verify_signed_data(self, entity_public_key, entity_name, signature, valid_from, valid_to, ca, data,
+                           data_signature):
+
         if not self.verify_certificate(entity_public_key=entity_public_key, entity_name=entity_name, ca=ca,
-                                       signature=signature, valid_from=valid_from, valid_to=valid_to, data_signature=data_signature):
+                                       signature=signature, valid_from=valid_from, valid_to=valid_to,
+                                       data_signature=data_signature):
+            print(Fore.RED + f"Authentication for EX-Container's certificate FAILED " + Style.RESET_ALL)
             return False
 
         # If it has a valid certificate,
         # Check authenticity of the data signed by the entity
         data_hash = SHA256.new(data)
-        signature = base64.b64decode(signature)
+        signature = base64.b64decode(data_signature)
         try:
-            pkcs1_15.new(entity.get_public_key()).verify(data_hash, signature)
+            pkcs1_15.new(entity_public_key).verify(data_hash, signature)
             return True
         except (ValueError, TypeError):
             return False
@@ -259,6 +262,8 @@ class RelyingHypervisor:
 
         if not is_verified:
             print(Fore.RED + "\nVerification of signed data failed\n" + Style.RESET_ALL)
+        else:
+            print(Fore.GREEN + "\nVerification of signed data succeeded\n" + Style.RESET_ALL)
 
         if task_type == "file_io":
             print(f"Hypervisor handling file I/O for container: {decrypted_data}")

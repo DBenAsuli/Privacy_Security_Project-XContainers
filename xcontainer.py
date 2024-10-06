@@ -3,8 +3,10 @@
 # Siwar Mansour
 # The Hebrew University of Jerusalem                      September 2024
 
-from container import *
 from cryptography.fernet import Fernet
+
+from container import *
+
 
 class XContainer(Container):
     def __init__(self, name, root_dir, hypervisor):
@@ -47,7 +49,6 @@ class XContainer(Container):
         try:
             # Encrypt memory before running the command
             encrypted_command = self.encrypt_command(command)
-            print(f"Encrypted command: {encrypted_command}")
 
             # Decrypt before execution
             decrypted_command = self.decrypt_command(encrypted_command)
@@ -67,7 +68,6 @@ class XContainer(Container):
 
             # Encrypt the output
             encrypted_output = self.encrypt_command(result.stdout.decode("utf-8").strip())
-            print(f"Encrypted output: {encrypted_output}")
 
             # Decrypt the output for external use
             output = self.decrypt_command(encrypted_output)

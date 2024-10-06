@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Typo fix">
+    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="All MacOS tests are stable">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/container.py" beforeDir="false" afterPath="$PROJECT_DIR$/container.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/excontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/excontainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pki.py" beforeDir="false" afterPath="$PROJECT_DIR$/pki.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xcontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/xcontainer.py" afterDir="false" />
     </list>
@@ -69,7 +69,7 @@
       <workItem from="1726531326253" duration="4981000" />
       <workItem from="1726771415344" duration="3406000" />
       <workItem from="1726786611367" duration="143000" />
-      <workItem from="1726786813013" duration="53677000" />
+      <workItem from="1726786813013" duration="55890000" />
     </task>
     <task id="LOCAL-00001" summary="dd">
       <option name="closed" value="true" />
@@ -231,7 +231,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728159549128</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Implement unique tests for EXContainers">
+      <option name="closed" value="true" />
+      <created>1728245293467</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1728245293467</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -307,6 +315,8 @@
     <MESSAGE value="Implement PKI Flow for RelyingContainer" />
     <MESSAGE value="Integrate PKI Features to excontainer.py" />
     <MESSAGE value="Typo fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="Typo fix" />
+    <MESSAGE value="Implement unique tests for EXContainers" />
+    <MESSAGE value="All MacOS tests are stable" />
+    <option name="LAST_COMMIT_MESSAGE" value="All MacOS tests are stable" />
   </component>
 </project>
