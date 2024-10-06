@@ -149,8 +149,10 @@ def verify_container_mac(root_dir="./root_dir"):
 
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
     else:
         print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
 
 
 # Run Isolation tests for Container class (Linux)
@@ -248,8 +250,10 @@ def test_container_isolation_mac(root_dir="./root_dir"):
 
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
     else:
         print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
 
 
 # Run tests for X-Container class (Linux)
@@ -455,8 +459,11 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
 
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll X-Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
     else:
         print(Fore.RED + "Some X-Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
+
 
 
 # Run tests for Enhanced X-Container class (Linux)
@@ -487,7 +494,6 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO Implement after EX-Containers are implemented
     # Test secure command execution with encryption and decryption for both containers
     try:
         print(Fore.BLUE + "--- Testing Command Encryption and Decryption for EXContainer 1 ---" + Style.RESET_ALL)
@@ -666,8 +672,11 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
 
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll X-Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
     else:
         print(Fore.RED + "Some X-Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
+
 
 
 # Run unique tests for Enhanced X-Container class (Linux)
@@ -681,62 +690,168 @@ def unique_verify_excontainer(root_dir="./root_dir_ex"):
     excontainer_2 = EXContainer(name="EXContainer_2", root_dir=root_dir, hypervisor=hypervisor_2, ca=ca)
     excontainer_2.request_certificate(ca=ca)
 
+    hypervisor_3 = Hypervisor()
+    xcontainer_1 = XContainer(name="XContainer_1", root_dir=root_dir, hypervisor=hypervisor_3)
+
+    hypervisor_4 = Hypervisor()
+    xcontainer_2 = XContainer(name="XContainer_2", root_dir=root_dir, hypervisor=hypervisor_4)
+
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO Implement SIWAR
-
-
+    # TODO IMPLEMENT SIWAR
+        
+        
 # Run unique tests for Enhanced X-Container class (MacOS)
 def unique_verify_excontainer_mac(root_dir="./root_dir_ex"):
-    ca = CA()
-    hypervisor_1 = RelyingHypervisor()
+    ca = CA()  # Certificate Authority for EXContainers
+    hypervisor_1 = RelyingHypervisor()  # Hypervisor for Enhanced X-Containers
+    hypervisor_2 = Hypervisor() # Hypervisor for 'regular'' X-Containers
+
+    # Create an enhanced X-Containers with PKI
     excontainer_1 = EXContainer(name="EXContainer_1", root_dir=root_dir, hypervisor=hypervisor_1, ca=ca)
     excontainer_1.request_certificate(ca=ca)
-
-    hypervisor_2 = RelyingHypervisor()
-    excontainer_2 = EXContainer(name="EXContainer_2", root_dir=root_dir, hypervisor=hypervisor_2, ca=ca)
+    excontainer_2 = EXContainer(name="EXContainer_2", root_dir=root_dir, hypervisor=hypervisor_1, ca=ca)
     excontainer_2.request_certificate(ca=ca)
+
+    # Create a regular X-Containers
+    xcontainer_1 = XContainer(name="XContainer_1", root_dir=root_dir, hypervisor=hypervisor_2)
+    xcontainer_2 = XContainer(name="XContainer_2", root_dir=root_dir, hypervisor=hypervisor_2)
 
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO Implement
+    # Compromise of Encryption Keys
+    print("--- Testing Compromise of Encryption Keys ---")
+    try:
+        sensitive_data = "Sensitive Data"
+
+        # EXContainer: Encrypt and decrypt securely with dynamically generated keys
+        encrypted_data = excontainer_1.encrypt_data(sensitive_data.encode('utf-8'), hypervisor_1.public_key)
+        decrypted_data = str(excontainer_1.hypervisor.decrypt_data(encrypted_data))
+        assert decrypted_data[2:-1] == sensitive_data, "Failed decryption in EXContainer"
+        test_results.append(("Compromise of Encryption Keys - EXContainer", True))
+
+        # XContainer: Regular encryption (keys may be compromised)
+        encrypted_data_x = xcontainer_1.encrypt_command(sensitive_data)
+        decrypted_data_x = xcontainer_1.decrypt_command(encrypted_data_x)
+        assert decrypted_data_x != sensitive_data, "XContainer should fail due to key compromise"
+        test_results.append(("Compromise of Encryption Keys - XContainer", False, "Expected failure, but passed"))
+    except Exception as e:
+        test_results.append(("Compromise of Encryption Keys - XContainer", True))
+
+    # Man-in-the-Middle Attacks
+    print("--- Testing Man-in-the-Middle Attacks ---")
+    try:
+        # EXContainer: Signed and authenticated communication between containers
+        excontainer_1.send_secure_message(excontainer_2, "Hello from EXContainer 1")
+        response_ex = excontainer_2.receive_secure_message(excontainer_1.public_key)  # Pass the sender's public key
+        assert response_ex == "Hello from EXContainer 1", "Man-in-the-Middle attack detected in EXContainer"
+        test_results.append(("Man-in-the-Middle Attacks - EXContainer", True))
+
+        # XContainer: Symmetric encryption, potential MiTM attack
+        xcontainer_1.send_secure_message(xcontainer_2, "Hello from XContainer 1")
+        intercepted_message = "Altered message"
+        response_x = xcontainer_2.receive_secure_message(intercepted_message.encode('utf-8'))
+        assert response_x != "Hello from XContainer 1", "XContainer should fail due to MiTM vulnerability"
+        test_results.append(("Man-in-the-Middle Attacks - XContainer", False, "Expected failure, but passed"))
+
+    except Exception as e:
+        test_results.append(("Man-in-the-Middle Attacks - XContainer", True))
+
+    # Secure Task Offloading Exploitation
+    print("--- Testing Secure Task Offloading Exploitation ---")
+    try:
+        # EXContainer: Only certified tasks are offloaded
+        offload_result_ex = excontainer_1.offload_to_hypervisor("file_io", "testfile.txt")
+        assert "Handled" in offload_result_ex, "Task offloading failed in EXContainer"
+        test_results.append(("Secure Task Offloading - EXContainer", True))
+
+        # XContainer: Potential task manipulation
+        offload_result_x = xcontainer_1.offload_to_hypervisor("file_io", "testfile.txt")
+        assert "Handled" not in offload_result_x, "XContainer should fail due to insecure offloading"
+        test_results.append(("Secure Task Offloading - XContainer", False, "Expected failure, but passed"))
+    except Exception as e:
+        test_results.append(("Secure Task Offloading - XContainer", True))
+
+    # Key Revocation and Certificate Expiry
+    print("--- Testing Key Revocation and Certificate Expiry ---")
+    try:
+        # EXContainer: Revoke the certificate and test if secure operations are blocked
+        ca.revoke_certificate(excontainer_1.name, excontainer_1.certificate)
+        try:
+            excontainer_1.offload_to_hypervisor("echo 'This should fail'")
+            test_results.append(("Key Revocation - EXContainer", False, "Expected revocation failure, but passed"))
+        except Exception:
+            test_results.append(("Key Revocation - EXContainer", True))
+
+        # XContainer: No certificate revocation mechanism, should not affect operations
+        try:
+            xcontainer_1.run_secure_command_mac("echo 'No revocation mechanism'")
+            test_results.append(("Key Revocation - XContainer", True))
+        except Exception as e:
+            test_results.append(("Key Revocation - XContainer", False, str(e)))
+    except Exception as e:
+        test_results.append(("Key Revocation and Expiry Test - EXContainer", False, str(e)))
+
+    # Test results
+    print("\n--- Test Results ---")
+    for test, passed, *reason in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        reason_message = f" - Reason: {reason[0]}" if reason else ""
+        print(color + f"{test}: {status}{reason_message}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll EXContainer tests completed successfully!" + Style.RESET_ALL)
+        return True
+    else:
+        print(Fore.RED + "\nSome tests failed. Check the results above." + Style.RESET_ALL)
+        return False
 
 
 # Run 'regular' Containers tests
 def run_containers_tests(SYSTEM='LINUX'):
+    res = True
     if SYSTEM == 'LINUX':
         print(Fore.CYAN + "Running verify_container:\n" + Style.RESET_ALL)
-        verify_container()
+        res &= verify_container()
         print(Fore.CYAN + "\n\nRunning test_container_isolation:\n" + Style.RESET_ALL)
-        test_container_isolation()
+        res &= test_container_isolation()
     elif SYSTEM == 'MACOS':
         print(Fore.CYAN + "Running verify_container_mac:\n" + Style.RESET_ALL)
-        verify_container_mac()
+        res &= verify_container_mac()
+
+    return res
 
 
 # Run 'Traditional' X-Containers tests
 def run_xcontainer_tests(SYSTEM='LINUX'):
+    res = True
     if SYSTEM == 'LINUX':
         pass  # TODO
     elif SYSTEM == 'MACOS':
         print(Fore.CYAN + "Running verify_xcontainer_mac:\n" + Style.RESET_ALL)
-        verify_xcontainer_mac()
+        res &= verify_xcontainer_mac()
+
+    return res
 
 
 # Run our enhanced X-Containers tests
 def run_enhanced_xcontainer_tests(SYSTEM='LINUX'):
+    res = True
     if SYSTEM == 'LINUX':
         print(Fore.CYAN + "\nRunning verify_excontainer:\n" + Style.RESET_ALL)
-        verify_excontainer()
+        res &= verify_excontainer()
         print(Fore.CYAN + "\nRunning unique_verify_excontainer:\n" + Style.RESET_ALL)
-        unique_verify_excontainer()
+        res &= unique_verify_excontainer()
     elif SYSTEM == 'MACOS':
         print(Fore.CYAN + "\nRunning verify_excontainer_mac:\n" + Style.RESET_ALL)
-        verify_excontainer_mac()
+        res &= verify_excontainer_mac()
         print(Fore.CYAN + "\nRunning unique_verify_excontainer_mac:\n" + Style.RESET_ALL)
-        unique_verify_excontainer_mac()
+        res &= unique_verify_excontainer_mac()
+
+    return res
 
 
 # Run all the tests

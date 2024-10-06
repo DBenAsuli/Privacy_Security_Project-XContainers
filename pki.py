@@ -56,13 +56,8 @@ class CA:
 
     # Verify the signature was not revoked by CA and still considered valid
     def verify_signature_validity(self, entity_name, signature):
-        print("dfgdsfgdfgs1")
         if entity_name in self.certificates_dict:
-            print("dfgdsfgdfgs2")
-
             if signature in self.certificates_dict[entity_name]:
-                print("dfgdsfgdfgs3")
-
                 return True
 
         return False

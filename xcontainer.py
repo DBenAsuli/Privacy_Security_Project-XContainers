@@ -79,6 +79,17 @@ class XContainer(Container):
     def read_secure_file(self, file_path):
         return self.decrypt_file(f"{self.root_dir}/{file_path}")
 
+    # Sending a message securely to another X-Container
+    def send_secure_message(self, recipient_container, message):
+        encrypted_message = self.encryption_key.encrypt(message.encode('utf-8'))
+        return recipient_container.receive_secure_message(encrypted_message)
+
+    # Receive a message securely from another X-Container
+    def receive_secure_message(self, encrypted_message, sender_public_key=None):
+        message = self.encryption_key.decrypt(encrypted_message).decode('utf-8')
+        print(f"{self.name} received a message: {message}")
+        return message
+
 
 # Hypervisor Simulation
 class Hypervisor:

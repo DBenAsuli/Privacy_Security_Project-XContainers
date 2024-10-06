@@ -15,11 +15,18 @@ if __name__ == '__main__':
         SYSTEM = 'LINUX'
         print("Non-valid OS name. Choosing Linux.")
 
+    res = True
     print(Fore.MAGENTA + "\nTesting Containers\n" + Style.RESET_ALL)
-    #run_containers_tests(SYSTEM)
+    res &= run_containers_tests(SYSTEM)
 
     print(Fore.MAGENTA + "\nTesting X-Containers\n" + Style.RESET_ALL)
-    #run_xcontainer_tests(SYSTEM)
+    res &= run_xcontainer_tests(SYSTEM)
 
     print(Fore.MAGENTA + "\nTesting Enhanced X-Containers\n" + Style.RESET_ALL)
-    run_enhanced_xcontainer_tests(SYSTEM)
+    res &= run_enhanced_xcontainer_tests(SYSTEM)
+
+    if res == True:
+        print(Fore.GREEN + "\nALL TESTS PASSED! \n" + Style.RESET_ALL)
+    else:
+        print(Fore.RED + "\nSOME TESTS FAILED :( \n" + Style.RESET_ALL)
+

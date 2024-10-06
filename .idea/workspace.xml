@@ -4,8 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Integrate PKI Features to excontainer.py">
+    <list default="true" id="58988740-8a96-45e5-a869-b7d1390df226" name="Changes" comment="Typo fix">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/excontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/excontainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pki.py" beforeDir="false" afterPath="$PROJECT_DIR$/pki.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xcontainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/xcontainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,10 +27,11 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="dca1ec40611640585bfa016fdcafe925f2a97044" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="MIXED" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -63,7 +69,7 @@
       <workItem from="1726531326253" duration="4981000" />
       <workItem from="1726771415344" duration="3406000" />
       <workItem from="1726786611367" duration="143000" />
-      <workItem from="1726786813013" duration="42066000" />
+      <workItem from="1726786813013" duration="53677000" />
     </task>
     <task id="LOCAL-00001" summary="dd">
       <option name="closed" value="true" />
@@ -201,7 +207,31 @@
       <option name="project" value="LOCAL" />
       <updated>1728159332083</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Typo fix">
+      <option name="closed" value="true" />
+      <created>1728159446111</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1728159446111</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Typo fix">
+      <option name="closed" value="true" />
+      <created>1728159509676</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1728159509676</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Typo fix">
+      <option name="closed" value="true" />
+      <created>1728159549128</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1728159549128</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -276,6 +306,7 @@
     <MESSAGE value="Initial migration of PKI from ex2 + Initial implementation of excontainer.py classes" />
     <MESSAGE value="Implement PKI Flow for RelyingContainer" />
     <MESSAGE value="Integrate PKI Features to excontainer.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Integrate PKI Features to excontainer.py" />
+    <MESSAGE value="Typo fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="Typo fix" />
   </component>
 </project>
