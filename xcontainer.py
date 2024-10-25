@@ -72,7 +72,6 @@ class XContainer(Container):
             print(f"Error in XContainer {self.name}: {e}")
             return str(e)
 
-
     # Run a command securely inside the x-container (MacOS Version)
     def run_secure_command_mac(self, command):
         print(f"Running secure command in container {self.name}: {command}")

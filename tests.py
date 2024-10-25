@@ -73,7 +73,7 @@ def verify_container(root_dir="./root_dir"):
     process.start()
 
     for i, (command, expected_output) in enumerate(commands):
-        process = Process(target=run_container_test, args=(f"Container_{i + 2}", root_dir, command, result_queue))
+        process = Process(target=run_container_test, args=(f"Container_{i + 1}", root_dir, command, result_queue))
         processes.append(process)
         process.start()
 
@@ -100,8 +100,10 @@ def verify_container(root_dir="./root_dir"):
 
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
     else:
         print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
 
 
 # Run tests for Container class (MacOS)
@@ -200,8 +202,10 @@ def test_container_isolation(root_dir="./root_dir"):
 
     if all(result[1] for result in test_results):
         print(Fore.GREEN + "\nAll Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
     else:
         print(Fore.RED + "Some Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
 
 
 # Run Isolation tests for Container class (MacOS)
@@ -342,6 +346,7 @@ def verify_xcontainer(root_dir="./root_dir_x"):
         return True
     else:
         print(Fore.RED + "Some X-Containers tests failed on Linux. Check the output for details." + Style)
+
 
 # Run tests for X-Container class (MacOS)
 def verify_xcontainer_mac(root_dir="./root_dir_x"):
@@ -535,11 +540,14 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
 
 # Run tests for Enhanced X-Container class (Linux)
 def verify_excontainer(root_dir="./root_dir_ex"):
-    hypervisor_1 = Hypervisor()
-    excontainer_1 = EXContainer("EXContainer_1", root_dir, hypervisor_1)
+    ca = CA()
+    hypervisor_1 = RelyingHypervisor()
+    excontainer_1 = EXContainer(name="EXContainer_1", root_dir=root_dir, hypervisor=hypervisor_1, ca=ca)
+    excontainer_1.request_certificate(ca=ca)
 
-    hypervisor_2 = Hypervisor()
-    excontainer_2 = EXContainer("EXContainer_2", root_dir, hypervisor_2)
+    hypervisor_2 = RelyingHypervisor()
+    excontainer_2 = EXContainer(name="EXContainer_2", root_dir=root_dir, hypervisor=hypervisor_2, ca=ca)
+    excontainer_2.request_certificate(ca=ca)
 
     test_results = []
     clear_root_dir(root_dir)
@@ -650,8 +658,10 @@ def verify_excontainer(root_dir="./root_dir_ex"):
         # Simulate adversary trying to access file directly
         print(Fore.BLUE + "\n--- Testing Adversary Access to Encrypted Files ---" + Style.RESET_ALL)
         adversary_command = "cat secret_file1.txt"
-        result_adversary = subprocess.run(adversary_command, shell=True, cwd=root_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        adversary_output = result_adversary.stdout.decode("utf-8").strip() or result_adversary.stderr.decode("utf-8").strip()
+        result_adversary = subprocess.run(adversary_command, shell=True, cwd=root_dir, stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE)
+        adversary_output = result_adversary.stdout.decode("utf-8").strip() or result_adversary.stderr.decode(
+            "utf-8").strip()
         assert "Confidential info 1" not in adversary_output, "Adversary was able to read confidential information!"
         assert "no such file" in adversary_output.lower() or adversary_output.strip() != "", "Adversary got unexpected readable output!"
 
@@ -662,7 +672,19 @@ def verify_excontainer(root_dir="./root_dir_ex"):
         test_results.append(("Encryption of Multiple Commands or Adversary Access", False, str(e)))
         print(Fore.RED + f"Encryption of Multiple Commands or Adversary Access: FAILED" + Style.RESET_ALL)
 
-    return test_results
+    print(Fore.GREEN + "\n--- Test Results - Enhanced X-Containers ---" + Style.RESET_ALL)
+    for test, passed, *reason in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        reason_message = f" - Reason: {reason[0]}" if reason else ""
+        print(color + f"{test}: {status}{reason_message}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll X-Containers tests completed successfully!" + Style.RESET_ALL)
+        return True
+    else:
+        print(Fore.RED + "Some X-Containers tests failed. Check the output for details." + Style.RESET_ALL)
+        return False
 
 
 # Run tests for Enhanced X-Container class (MacOS)
