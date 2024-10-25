@@ -3,10 +3,8 @@
 # Siwar Mansour                                           207527680
 # The Hebrew University of Jerusalem                      October 2024
 
-from cryptography.fernet import Fernet
-
 from container import *
-
+from cryptography.fernet import Fernet
 
 class XContainer(Container):
     def __init__(self, name, root_dir, hypervisor):

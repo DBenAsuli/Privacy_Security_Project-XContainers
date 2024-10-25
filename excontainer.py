@@ -3,11 +3,9 @@
 # Siwar Mansour                                           207527680
 # The Hebrew University of Jerusalem                      October 2024
 
-from colorama import Fore, Style
-
 from pki import *
 from xcontainer import *
-
+from colorama import Fore, Style
 
 class EXContainer(XContainer):
     def __init__(self, name, root_dir, hypervisor, ca):

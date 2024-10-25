@@ -4,9 +4,8 @@
 # The Hebrew University of Jerusalem                      October 2024
 
 import shutil
-from multiprocessing import Process, Queue
-
 from excontainer import *
+from multiprocessing import Process, Queue
 
 
 # Run a command on Container (Linux)
