@@ -17,10 +17,10 @@ if __name__ == '__main__':
 
     res = True
     print(Fore.MAGENTA + "\nTesting Containers\n" + Style.RESET_ALL)
-    #   res &= run_containers_tests(SYSTEM)
+    res &= run_containers_tests(SYSTEM)
 
     print(Fore.MAGENTA + "\nTesting X-Containers\n" + Style.RESET_ALL)
-    #   res &= run_xcontainer_tests(SYSTEM)
+    res &= run_xcontainer_tests(SYSTEM)
 
     print(Fore.MAGENTA + "\nTesting Enhanced X-Containers\n" + Style.RESET_ALL)
     res &= run_enhanced_xcontainer_tests(SYSTEM)

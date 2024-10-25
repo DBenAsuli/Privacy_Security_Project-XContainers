@@ -40,8 +40,38 @@ class XContainer(Container):
     # Run a command securely inside the x-container (Linux Version)
     def run_secure_command(self, command):
         print(f"Running secure command in container {self.name}: {command}")
-        # TODO SIWAR Implement
-        pass
+
+        try:
+            # Encrypt command before running
+            encrypted_command = self.encrypt_command(command)
+            decrypted_command = self.decrypt_command(encrypted_command)
+
+            # Execute decrypted command in the container's root directory
+            result = subprocess.run(decrypted_command, shell=True, cwd=self.root_dir, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+
+            # Check if command involves file output redirection and encrypt file content
+            if ">" in command:
+                file_path = command.split(">")[-1].strip()
+                file_path = f"{self.root_dir}/{file_path}"
+                self.encrypt_file(file_path)  # Encrypt file after creation
+
+            # Handle `cat` command to read and decrypt file content for secure output
+            if command.startswith("cat "):
+                file_name = command.split("cat ", 1)[1].strip()
+                return self.read_secure_file(file_name)
+
+            # Encrypt the command output
+            encrypted_output = self.encrypt_command(result.stdout.decode("utf-8").strip())
+
+            # Decrypt output for display or further processing
+            output = self.decrypt_command(encrypted_output)
+            return output
+
+        except Exception as e:
+            print(f"Error in XContainer {self.name}: {e}")
+            return str(e)
+
 
     # Run a command securely inside the x-container (MacOS Version)
     def run_secure_command_mac(self, command):

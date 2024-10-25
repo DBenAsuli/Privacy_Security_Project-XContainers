@@ -70,38 +70,53 @@ class EXContainer(XContainer):
     # Run a command securely inside the x-container (Linux Version)
     def run_secure_command(self, command):
         print(f"Running secure command in container {self.name}: {command}")
-        # TODO SIWAR Implement
-        pass
+
+        try:
+            encrypted_command = self.encrypt_command(command)
+            decrypted_command = self.hypervisor.decrypt_command(encrypted_command)
+
+            result = subprocess.run(decrypted_command, shell=True, cwd=self.root_dir, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+
+            if ">" in command:
+                file_path = command.split(">")[-1].strip()
+                file_path = f"{self.root_dir}/{file_path}"
+                self.encrypt_file(file_path)  # Encrypt the file after creation
+
+            if command.startswith("cat "):
+                file_name = command.split("cat ", 1)[1].strip()
+                return self.read_secure_file(file_name)
+
+            encrypted_output = self.encrypt_command(result.stdout.strip())
+
+            output = self.hypervisor.decrypt_command(encrypted_output)
+            return output
+
+        except Exception as e:
+            print(f"Error in EXContainer {self.name}: {e}")
+            return str(e)
 
     # Run a command securely inside the x-container (MacOS Version)
     def run_secure_command_mac(self, command):
         print(f"Running secure command in container {self.name}: {command}")
         try:
 
-            # Encrypt memory before running the command
             encrypted_command = self.encrypt_command(command)
-
-            # Decrypt before execution
             decrypted_command = self.hypervisor.decrypt_command(encrypted_command)
 
             result = subprocess.run(decrypted_command, shell=True, cwd=self.root_dir, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
 
-            # Check if any file is created, and encrypt the file content
             if ">" in command:
                 file_path = command.split(">")[-1].strip()
                 file_path = f"{self.root_dir}/{file_path}"
                 self.encrypt_file(file_path)  # Encrypt the file after creation
 
-            # If it's a `cat` command, decrypt the file content before returning the result
             if command.startswith("cat "):
                 file_name = command.split("cat ", 1)[1].strip()
                 return self.read_secure_file(file_name)
 
-            # Encrypt the output
             encrypted_output = self.encrypt_command(result.stdout.strip())
-
-            # Decrypt the output for external use
             output = self.hypervisor.decrypt_command(encrypted_output)
             return output
         except Exception as e:
@@ -221,8 +236,8 @@ class RelyingHypervisor:
     def request_certificate_revokation(self, ca, entity_name, signature):
         ca.revoke_certificate(entity_name=entity_name, signature=signature)
 
-    # TODO Siwar Implement "challenge" flow
     def challenge(self):
+        # TODO Siwar Implement "challenge" flow
         pass
 
     def verify_signed_data(self, entity_public_key, entity_name, signature, valid_from, valid_to, ca, data,

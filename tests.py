@@ -267,8 +267,81 @@ def verify_xcontainer(root_dir="./root_dir_x"):
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO Siwar Implement for Linux
+    # Test secure command execution with encryption and decryption for both containers
+    try:
+        print(Fore.BLUE + "--- Testing Command Encryption and Decryption for XContainer 1 ---" + Style.RESET_ALL)
+        command_1 = "echo 'Hello from XContainer 1' > testfile_x1.txt"
+        output_1 = xcontainer_1.run_secure_command(command_1)
+        assert output_1 == "", "Expected no output after command execution in XContainer 1"
+        test_results.append(("Command Encryption and Decryption - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Command Encryption and Decryption - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
 
+    try:
+        print(Fore.BLUE + "\n--- Testing Command Encryption and Decryption for XContainer 2 ---" + Style.RESET_ALL)
+        command_2 = "echo 'Hello from XContainer 2' > testfile_x2.txt"
+        output_2 = xcontainer_2.run_secure_command(command_2)
+        assert output_2 == "", "Expected no output after command execution in XContainer 2"
+        test_results.append(("Command Encryption and Decryption - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Command Encryption and Decryption - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing File Content After Encryption for XContainer 1 ---" + Style.RESET_ALL)
+        output_1 = xcontainer_1.run_secure_command("cat testfile_x1.txt")
+        assert output_1.strip().lower() == "hello from xcontainer 1".strip().lower(), "File content mismatch in XContainer 1"
+        test_results.append(("File Content After Encryption - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("File Content After Encryption - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing File Content After Encryption for XContainer 2 ---" + Style.RESET_ALL)
+        output_2 = xcontainer_2.run_secure_command("cat testfile_x2.txt")
+        assert output_2.strip().lower() == "hello from xcontainer 2".strip().lower(), "File content mismatch in XContainer 2"
+        test_results.append(("File Content After Encryption - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("File Content After Encryption - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for XContainer 1 ---" + Style.RESET_ALL)
+        hypervisor_output_1 = xcontainer_1.offload_to_hypervisor("file_io", "testfile_x1.txt")
+        assert "Handled" in hypervisor_output_1, "Hypervisor did not handle the task correctly for XContainer 1"
+        test_results.append(("Task Offloading to Hypervisor - XContainer 1", True))
+        print(Fore.GREEN + f"Test passed for XContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Task Offloading to Hypervisor - XContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 1." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for XContainer 2 ---" + Style.RESET_ALL)
+        hypervisor_output_2 = xcontainer_2.offload_to_hypervisor("file_io", "testfile_x2.txt")
+        assert "Handled" in hypervisor_output_2, "Hypervisor did not handle the task correctly for XContainer 2"
+        test_results.append(("Task Offloading to Hypervisor - XContainer 2", True))
+        print(Fore.GREEN + f"Test passed for XContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Task Offloading to Hypervisor - XContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
+
+    print(Fore.GREEN + "\n--- Test Results - X-Containers (Linux) ---" + Style.RESET_ALL)
+    for test, passed, *reason in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        reason_message = f" - Reason: {reason[0]}" if reason else ""
+        print(color + f"{test}: {status}{reason_message}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll X-Containers tests completed successfully on Linux!" + Style.RESET_ALL)
+        return True
+    else:
+        print(Fore.RED + "Some X-Containers tests failed on Linux. Check the output for details." + Style)
 
 # Run tests for X-Container class (MacOS)
 def verify_xcontainer_mac(root_dir="./root_dir_x"):
@@ -304,7 +377,6 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         test_results.append(("Command Encryption and Decryption - XContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
-    # Verify that the file content is encrypted and decrypted properly for both containers
     try:
         print(Fore.BLUE + "\n--- Testing File Content After Encryption for XContainer 1 ---" + Style.RESET_ALL)
         output_1 = xcontainer_1.run_secure_command_mac("cat testfile_x1.txt")
@@ -325,7 +397,6 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         test_results.append(("File Content After Encryption - XContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
-    # Check task offloading to hypervisor for both containers
     try:
         print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for XContainer 1 ---" + Style.RESET_ALL)
         hypervisor_output_1 = xcontainer_1.offload_to_hypervisor("file_io", "testfile_x1.txt")
@@ -346,7 +417,6 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         test_results.append(("Task Offloading to Hypervisor - XContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
-    # Memory encryption tests for both containers
     try:
         print(Fore.BLUE + "\n--- Testing Memory Encryption for XContainer 1 ---" + Style.RESET_ALL)
         sensitive_data_1 = "Sensitive Data 1"
@@ -374,7 +444,6 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
     try:
         print(Fore.BLUE + "\n--- Testing Encryption of Multiple Commands ---" + Style.RESET_ALL)
 
-        # Encryption of Multiple Commands (with expected decrypted output):
         commands = [
             ("echo 'Confidential info 1' > secret_file1.txt", ""),  # echo doesn't produce output
             ("echo 'Confidential info 2' > secret_file2.txt", ""),  # echo doesn't produce output
@@ -431,7 +500,6 @@ def verify_xcontainer_mac(root_dir="./root_dir_x"):
         test_results.append(("Hypervisor Offloading for Sensitive I/O", False, str(e)))
         print(Fore.RED + "Hypervisor Offloading for Sensitive I/O: FAILED" + Style.RESET_ALL)
 
-    # Verify that XContainer 2 cannot decrypt XContainer 1's data
     try:
         print(Fore.BLUE + "\n--- Testing Cross-Container Encryption Isolation ---" + Style.RESET_ALL)
 
@@ -476,7 +544,125 @@ def verify_excontainer(root_dir="./root_dir_ex"):
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO Siwar
+    # Test secure command execution with encryption and decryption for both containers
+    try:
+        print(Fore.BLUE + "--- Testing Command Encryption and Decryption for EXContainer 1 ---" + Style.RESET_ALL)
+        command_1 = "echo 'Bonjourno from EXContainer 1' > testfile_x1.txt"
+        output_1 = excontainer_1.run_secure_command(command_1)
+        assert output_1 == "", "Expected no output after command execution in EXContainer 1"
+        test_results.append(("Command Encryption and Decryption - EXContainer 1", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Command Encryption and Decryption - EXContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 1." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Command Encryption and Decryption for EXContainer 2 ---" + Style.RESET_ALL)
+        command_2 = "echo 'Bonjourno from EXContainer 2' > testfile_x2.txt"
+        output_2 = excontainer_2.run_secure_command(command_2)
+        assert output_2 == "", "Expected no output after command execution in EXContainer 2"
+        test_results.append(("Command Encryption and Decryption - EXContainer 2", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Command Encryption and Decryption - EXContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing File Content After Encryption for EXContainer 1 ---" + Style.RESET_ALL)
+        output_1 = excontainer_1.run_secure_command("cat testfile_x1.txt")
+        assert output_1.strip().lower() == "Bonjourno from EXContainer 1".strip().lower(), "File content mismatch in EXContainer 1"
+        test_results.append(("File Content After Encryption - EXContainer 1", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("File Content After Encryption - EXContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 1." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing File Content After Encryption for EXContainer 2 ---" + Style.RESET_ALL)
+        output_2 = excontainer_2.run_secure_command("cat testfile_x2.txt")
+        assert output_2.strip().lower() == "Bonjourno from EXContainer 2".strip().lower(), "File content mismatch in EXContainer 2"
+        test_results.append(("File Content After Encryption - EXContainer 2", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("File Content After Encryption - EXContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for EXContainer 1 ---" + Style.RESET_ALL)
+        hypervisor_output_1 = excontainer_1.offload_to_hypervisor("file_io", "testfile_x1.txt")
+        assert "Handled" in hypervisor_output_1, "Hypervisor did not handle the task correctly for EXContainer 1"
+        test_results.append(("Task Offloading to Hypervisor - EXContainer 1", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Task Offloading to Hypervisor - EXContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 1." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for EXContainer 2 ---" + Style.RESET_ALL)
+        hypervisor_output_2 = excontainer_2.offload_to_hypervisor("file_io", "testfile_x2.txt")
+        assert "Handled" in hypervisor_output_2, "Hypervisor did not handle the task correctly for EXContainer 2"
+        test_results.append(("Task Offloading to Hypervisor - EXContainer 2", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Task Offloading to Hypervisor - EXContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Memory Encryption for EXContainer 1 ---" + Style.RESET_ALL)
+        sensitive_data_1 = "Sensitive Data 1"
+        encrypted_data_1 = excontainer_1.encrypt_command(sensitive_data_1)
+        decrypted_data_1 = excontainer_1.hypervisor.decrypt_command(encrypted_data_1)
+        assert decrypted_data_1 == sensitive_data_1, "Decrypted data does not match original in EXContainer 1"
+        test_results.append(("Memory Encryption - EXContainer 1", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 1." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Memory Encryption - EXContainer 1", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 1." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Memory Encryption for EXContainer 2 ---" + Style.RESET_ALL)
+        sensitive_data_2 = "Sensitive Data 2"
+        encrypted_data_2 = excontainer_2.encrypt_command(sensitive_data_2)
+        decrypted_data_2 = excontainer_2.hypervisor.decrypt_command(encrypted_data_2)
+        assert decrypted_data_2 == sensitive_data_2, "Decrypted data does not match original in EXContainer 2"
+        test_results.append(("Memory Encryption - EXContainer 2", True))
+        print(Fore.GREEN + f"Test passed for EXContainer 2." + Style.RESET_ALL)
+    except Exception as e:
+        test_results.append(("Memory Encryption - EXContainer 2", False, str(e)))
+        print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
+
+    try:
+        print(Fore.BLUE + "\n--- Testing Encryption of Multiple Commands ---" + Style.RESET_ALL)
+        commands = [
+            ("echo 'Confidential info 1' > secret_file1.txt", ""),
+            ("echo 'Confidential info 2' > secret_file2.txt", ""),
+            ("cat secret_file1.txt", "Confidential info 1"),
+            ("cat secret_file2.txt", "Confidential info 2")
+        ]
+
+        for cmd, expected_output in commands:
+            result = excontainer_1.run_secure_command(cmd)
+            assert result.strip().lower() == expected_output.strip().lower(), f"Unexpected output for command: {cmd}\nExpected: {expected_output}\nGot: {result}"
+
+        test_results.append(("Encryption of Multiple Commands", True))
+        print(Fore.GREEN + "Encryption of Multiple Commands: PASSED" + Style.RESET_ALL)
+
+        # Simulate adversary trying to access file directly
+        print(Fore.BLUE + "\n--- Testing Adversary Access to Encrypted Files ---" + Style.RESET_ALL)
+        adversary_command = "cat secret_file1.txt"
+        result_adversary = subprocess.run(adversary_command, shell=True, cwd=root_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        adversary_output = result_adversary.stdout.decode("utf-8").strip() or result_adversary.stderr.decode("utf-8").strip()
+        assert "Confidential info 1" not in adversary_output, "Adversary was able to read confidential information!"
+        assert "no such file" in adversary_output.lower() or adversary_output.strip() != "", "Adversary got unexpected readable output!"
+
+        test_results.append(("Adversary Access to Encrypted Files", True))
+        print(Fore.GREEN + "Adversary Access to Encrypted Files: PASSED" + Style.RESET_ALL)
+
+    except Exception as e:
+        test_results.append(("Encryption of Multiple Commands or Adversary Access", False, str(e)))
+        print(Fore.RED + f"Encryption of Multiple Commands or Adversary Access: FAILED" + Style.RESET_ALL)
+
+    return test_results
 
 
 # Run tests for Enhanced X-Container class (MacOS)
@@ -516,7 +702,6 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
         test_results.append(("Command Encryption and Decryption - EXContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
 
-    # Verify that the file content is encrypted and decrypted properly for both containers
     try:
         print(Fore.BLUE + "\n--- Testing File Content After Encryption for EXContainer 1 ---" + Style.RESET_ALL)
         output_1 = excontainer_1.run_secure_command_mac("cat testfile_x1.txt")
@@ -537,7 +722,6 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
         test_results.append(("File Content After Encryption - EXContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
 
-    # Check task offloading to hypervisor for both containers
     try:
         print(Fore.BLUE + "\n--- Testing Task Offloading to Hypervisor for EXContainer 1 ---" + Style.RESET_ALL)
         hypervisor_output_1 = excontainer_1.offload_to_hypervisor("file_io", "testfile_x1.txt")
@@ -558,7 +742,6 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
         test_results.append(("Task Offloading to Hypervisor - EXContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for EXContainer 2." + Style.RESET_ALL)
 
-    # Memory encryption tests for both containers
     try:
         print(Fore.BLUE + "\n--- Testing Memory Encryption for EXContainer 1 ---" + Style.RESET_ALL)
         sensitive_data_1 = "Sensitive Data 1"
@@ -586,7 +769,6 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
     try:
         print(Fore.BLUE + "\n--- Testing Encryption of Multiple Commands ---" + Style.RESET_ALL)
 
-        # Encryption of Multiple Commands (with expected decrypted output):
         commands = [
             ("echo 'Confidential info 1' > secret_file1.txt", ""),  # echo doesn't produce output
             ("echo 'Confidential info 2' > secret_file2.txt", ""),  # echo doesn't produce output
@@ -647,13 +829,8 @@ def verify_excontainer_mac(root_dir="./root_dir_ex"):
     try:
         print(Fore.BLUE + "\n--- Testing Cross-Container Encryption Isolation ---" + Style.RESET_ALL)
 
-        # EXContainer 1 encrypts some data
         excontainer_1.run_secure_command_mac("echo 'Private data from EXContainer 1' > cross_test_file.txt")
-
-        # EXContainer 2 tries to read and decrypt the file
         cross_container_output = excontainer_2.run_secure_command_mac("cat cross_test_file.txt")
-
-        # The output should not match the original text, since EXContainer 2's decryption should fail
         assert cross_container_output.strip() != "Private data from EXContainer 1".strip(), "EXContainer 2 was able to decrypt EXContainer 1's file!"
 
         test_results.append(("Cross-Container Encryption Isolation", True))
@@ -697,7 +874,22 @@ def unique_verify_excontainer(root_dir="./root_dir_ex"):
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO IMPLEMENT Siwar
+    # TODO Siwar
+
+    # Test results
+    print("\n--- Test Results ---")
+    for test, passed, *reason in test_results:
+        status = "PASSED" if passed else "FAILED"
+        color = Fore.GREEN if passed else Fore.RED
+        reason_message = f" - Reason: {reason[0]}" if reason else ""
+        print(color + f"{test}: {status}{reason_message}" + Style.RESET_ALL)
+
+    if all(result[1] for result in test_results):
+        print(Fore.GREEN + "\nAll EXContainer tests completed successfully!" + Style.RESET_ALL)
+        return True
+    else:
+        print(Fore.RED + "\nSome tests failed. Check the results above." + Style.RESET_ALL)
+        return False
 
 
 # Run unique tests for Enhanced X-Container class (MacOS)
@@ -719,7 +911,7 @@ def unique_verify_excontainer_mac(root_dir="./root_dir_ex"):
     test_results = []
     clear_root_dir(root_dir)
 
-    # TODO IMPLEMENT SIWAR
+    # TODO Siwar
 
     # Test results
     print("\n--- Test Results ---")
@@ -756,7 +948,8 @@ def run_containers_tests(SYSTEM='LINUX'):
 def run_xcontainer_tests(SYSTEM='LINUX'):
     res = True
     if SYSTEM == 'LINUX':
-        pass  # TODO Siwar
+        print(Fore.CYAN + "Running verify_xcontainer:\n" + Style.RESET_ALL)
+        res &= verify_xcontainer()
     elif SYSTEM == 'MACOS':
         print(Fore.CYAN + "Running verify_xcontainer_mac:\n" + Style.RESET_ALL)
         res &= verify_xcontainer_mac()
