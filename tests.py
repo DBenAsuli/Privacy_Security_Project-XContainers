@@ -333,7 +333,7 @@ def verify_xcontainer(root_dir="./root_dir_x"):
         test_results.append(("Task Offloading to Hypervisor - XContainer 2", False, str(e)))
         print(Fore.RED + f"Test failed for XContainer 2." + Style.RESET_ALL)
 
-    print(Fore.GREEN + "\n--- Test Results - X-Containers (Linux) ---" + Style.RESET_ALL)
+    print(Fore.GREEN + "\n--- Test Results - X-Containers ---" + Style.RESET_ALL)
     for test, passed, *reason in test_results:
         status = "PASSED" if passed else "FAILED"
         color = Fore.GREEN if passed else Fore.RED
@@ -341,10 +341,10 @@ def verify_xcontainer(root_dir="./root_dir_x"):
         print(color + f"{test}: {status}{reason_message}" + Style.RESET_ALL)
 
     if all(result[1] for result in test_results):
-        print(Fore.GREEN + "\nAll X-Containers tests completed successfully on Linux!" + Style.RESET_ALL)
+        print(Fore.GREEN + "\nAll X-Containers tests completed successfully!" + Style.RESET_ALL)
         return True
     else:
-        print(Fore.RED + "Some X-Containers tests failed on Linux. Check the output for details." + Style)
+        print(Fore.RED + "Some X-Containers tests failed. Check the output for details." + Style)
 
 
 # Run tests for X-Container class (MacOS)
